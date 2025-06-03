@@ -10,7 +10,6 @@ class CustomUser(AbstractUser):
     # No AbstractUser ja tem o campo (username, email, password,first_name,
     # last_name, date_joined, is_active, is_staff, is_superuser, last_login)
     
-    
     def __str__(self):
         return f'{self.username} - {self.data_criacao.strftime("%d/%m/%Y")}'
 
