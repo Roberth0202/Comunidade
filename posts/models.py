@@ -8,7 +8,7 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     # link, imagem e video externo
-    external_link = models.models.URLField(blank=True, max_length=200)
+    external_link = models.URLField(blank=True, max_length=200)
     image = models.ImageField(upload_to='posts/images/', blank=True, null=True, verbose_name='Imagem do Post')
     video = models.FileField(upload_to='posts/videos/', blank=True, null=True, verbose_name='Vídeo do Post')
     
@@ -25,7 +25,7 @@ class Post(models.Model):
         verbose_name_plural = 'Posts'
 
 # Criar o modelo para comentarios dos post
-class comments(models.Molde):
+class comments(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments') # Relaciona o comentário com o post ao qual ele pertence
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='comments') # Relaciona o comentário com o usuário que o criou
     content = models.TextField(max_length=280) # Conteúdo do comentário, limitado a 280 caracteres
