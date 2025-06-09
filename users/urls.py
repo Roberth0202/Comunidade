@@ -2,8 +2,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # tela inicial da rede social
-    path('/', views.index, name='home'),
     # tela de login
     path('login/', views.login, name='login_view'),
     # tela de cadastro
