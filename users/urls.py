@@ -9,7 +9,7 @@ urlpatterns = [
     # tela de recuperação de senha
     path('recuperar-senha/', views.recuperar_senha, name='recuperar_senha'),
     # tela de perfil
-    path('perfil/<str:usuario>', views.perfil, name='perfil'),
+    path('perfil/<str:username>', views.perfil, name='perfil'),
     # tela de editar perfil
     path('perfil/<int:id>/editar/', views.editar_perfil, name='edit_profile'),
     # tela de configurações

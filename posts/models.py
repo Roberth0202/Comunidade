@@ -25,7 +25,7 @@ class Post(models.Model):
         verbose_name_plural = 'Posts'
 
 # Criar o modelo para comentarios dos post
-class comments(models.Model):
+class Comments(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments') # Relaciona o comentário com o post ao qual ele pertence
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='comments') # Relaciona o comentário com o usuário que o criou
     content = models.TextField(max_length=280) # Conteúdo do comentário, limitado a 280 caracteres

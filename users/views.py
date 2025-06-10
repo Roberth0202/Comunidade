@@ -1,6 +1,6 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
+from .models import CustomUser
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.password_validation import get_password_validators, validate_password
 from django.contrib import messages
@@ -37,10 +37,10 @@ def register_view(request):
             messages.error(request, 'As senhas não coincidem', extra_tags='senhas_diferentes')
             return render(request, 'users/register.html')
         # Verifica se o usuário já existe        
-        if User.objects.filter(username=username).exists():
+        if CustomUser.objects.filter(username=username).exists():
             return render(request, 'users/register.html', {'error': 'Usuário já existe'})
         # Verifica se o email já está cadastrado
-        if User.objects.filter(email=email).exists():
+        if CustomUser.objects.filter(email=email).exists():
             return render(request, 'users/register.html', {'error': 'Email já cadastrado'})
         
         validar_senha = get_password_validators(settings=AUTH_PASSWORD_VALIDATORS)
@@ -51,10 +51,10 @@ def register_view(request):
             return render(request, 'users/register.html', {'error': str(e)})
 
         # Cria um novo usuário
-        user = User.objects.create_user(username=username, password=password1, email=email, data_nascimento=data_nascimento)
+        user = CustomUser.objects.create_user(username=username, password=password1, email=email, data_nascimento=data_nascimento)
         user.save()
         
-        return redirect('/login/')  # Redireciona para a página de login após o cadastro bem-sucedido
+        return redirect('login/')  # Redireciona para a página de login após o cadastro bem-sucedido
     
     # Se o método for GET, renderiza a página de cadastro
     return render(request, 'users/register.html')
@@ -64,26 +64,42 @@ def register_view(request):
 def logout_view(request):
     # se o usuário está autenticado deve sair da conta
     logout(request)
-    return render(request, 'users/ligin.html')
+    return render(request, 'users/login.html')
 
 # --------------------------------------------- PAGINA DE PERFIL ----------------------------------------
 @login_required
-def profile(request):
+def profile(request, username):
+    # Obtém o perfil do usuário pelo nome de usuário
+    # Se o usuário não for encontrado, retorna um erro 404
+    perfil = get_object_or_404(CustomUser, username=username)
+    # Verifica se o usuário autenticado é o mesmo do perfil
     user = request.user
-    return render(request, 'users/profile.html', {'user': user})
+    
+    context = {
+        'perfil': perfil,
+        'user': user,
+    }
+    return render(request, 'users/profile.html', context)
 
 # ----------------------------------------------- PAGINA DE EDITAR PERFIL ----------------------------------------
 @login_required
-def edit_profile(request):
-    user = User.objects.get(id=request.user.id)
-    if request.method == 'POST':
-        user.username = request.POST.get('username', user.username)
-        user.email = request.POST.get('email', user.email)
-        user.avatar = request.FILES.get('avatar', user.avatar)
-        user.first_name = request.POST.get('first_name', user.first_name)
-        user.last_name = request.POST.get('last_name', user.last_name)
-        user.data_nascimento = request.POST.get('data_nascimento', user.data_nascimento)
-        # Aqui você pode adicionar mais campos do perfil para editar
-        user.save()
-        return render(request, 'users/profile.html', {'user': user, 'success': 'Perfil atualizado com sucesso'})
+def edit_profile(request, id):
+    user = request.user # Obtém o id do usuário autenticado
+    
+    # Verifica se o usuário tem permissão para editar o perfil
+    if user.id == id:
+        if request.method == 'POST':
+            user.username = request.POST.get('username', user.username)
+            user.email = request.POST.get('email', user.email)
+            user.avatar = request.FILES.get('avatar', user.avatar)
+            user.first_name = request.POST.get('first_name', user.first_name)
+            user.last_name = request.POST.get('last_name', user.last_name)
+            user.data_nascimento = request.POST.get('data_nascimento', user.data_nascimento)
+            user.save()
+            return render(request, 'users/profile.html', {'user': user, 'success': 'Perfil atualizado com sucesso'})    
+    else:
+        # Se o usuário não tiver permissão, redireciona para a página de perfil
+        messages.error(request, 'Você não tem permissão para editar este perfil.')
+        return redirect('perfil', usuario=user.username)
+        # nota: criar condição no template para verificar se o usuário é o mesmo do perfil 
     return render(request, 'users/edit_profile.html', {'user': user})
