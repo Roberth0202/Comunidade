@@ -113,6 +113,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+#-------------------------------------------- URL de login ---------------------------------------
+LOGIN_URL = '/login/'
+
 #-------------------------------- Redefinição de senha ----------------------------------
 # para enviar email pro console
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

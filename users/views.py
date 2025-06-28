@@ -5,6 +5,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.password_validation import get_password_validators, validate_password
 from django.contrib import messages
 from comuna.settings import AUTH_PASSWORD_VALIDATORS
+from .services import RegisterUser
+from asgiref.sync import sync_to_async
 
 # ------------------------------------------- PAGINA DE LOGIN ----------------------------------------
 def login_view(request):
@@ -23,38 +25,31 @@ def login_view(request):
     return render(request, 'users/login.html')
 
 # --------------------------------------- PAGINA DE CADASTRO ---------------------------------------
-def register_view(request):
+async def register_view(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password1 = request.POST.get('password1')
-        password2 = request.POST.get('password2')
-        email = request.POST.get('email')
-        data_nascimento = request.POST.get('data_nascimento')
+        # Obtém os dados do formulário de cadastro
+        validador = RegisterUser(
+            request,
+            username=request.POST.get('username'),
+            email=request.POST.get('email'),
+            password1=request.POST.get('password1'),
+            password2=request.POST.get('password2'), 
+            data_nascimento=request.POST.get('data_nascimento')
+            )
         
+        # Verifica se os dados do usuário são válidos
+        validacao = await sync_to_async(validador.is_valid)()
+        if validacao is not True:
+            return validacao # retorna o render do template com a mensagem de erro
         
-        # Verifica se as senhas são iguais
-        if password1 != password2:
-            messages.error(request, 'As senhas não coincidem', extra_tags='senhas_diferentes')
-            return render(request, 'users/register.html')
-        # Verifica se o usuário já existe        
-        if CustomUser.objects.filter(username=username).exists():
-            return render(request, 'users/register.html', {'error': 'Usuário já existe'})
-        # Verifica se o email já está cadastrado
-        if CustomUser.objects.filter(email=email).exists():
-            return render(request, 'users/register.html', {'error': 'Email já cadastrado'})
+        # valida a senha de acordo com as regras definidas
+        validacao = await sync_to_async(validador.valid_password)()
+        if validacao is not True:
+            return validacao
         
-        validar_senha = get_password_validators(settings=AUTH_PASSWORD_VALIDATORS)
-        # Valida a senha de acordo com as regras definidas
-        try:
-            validate_password(password1, user=None, password_validators=validar_senha)
-        except Exception as e:
-            return render(request, 'users/register.html', {'error': str(e)})
-
-        # Cria um novo usuário
-        user = CustomUser.objects.create_user(username=username, password=password1, email=email, data_nascimento=data_nascimento)
-        user.save()
+        # se tudo estiver correto, cria o usuário
+        return await sync_to_async(validador.create_user)()
         
-        return redirect('login/')  # Redireciona para a página de login após o cadastro bem-sucedido
     
     # Se o método for GET, renderiza a página de cadastro
     return render(request, 'users/register.html')
@@ -101,5 +96,5 @@ def edit_profile(request, id):
         # Se o usuário não tiver permissão, redireciona para a página de perfil
         messages.error(request, 'Você não tem permissão para editar este perfil.')
         return redirect('perfil', usuario=user.username)
-        # nota: criar condição no template para verificar se o usuário é o mesmo do perfil 
+        # nota: criar condição no template para verificar se o usuário é o mesmo do perfil
     return render(request, 'users/edit_profile.html', {'user': user})

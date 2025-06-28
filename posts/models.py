@@ -3,9 +3,9 @@ from django.conf import settings
 
 # Cria o modelo de post
 class Post(models.Model):
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='posts')
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='posts') # Relaciona o post com o usuário que o criou
     content = models.TextField(max_length=280) # Conteúdo do post, limitado a 280 caracteres
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True) # Cria automaticamente quando o post é criado
     
     # link, imagem e video externo
     external_link = models.URLField(blank=True, max_length=200)
@@ -13,14 +13,14 @@ class Post(models.Model):
     video = models.FileField(upload_to='posts/videos/', blank=True, null=True, verbose_name='Vídeo do Post')
     
     # enjamento do post
-    likes_count = models.IntegerField(default=0)
-    comments_count = models.IntegerField(default=0)
-    shares_count = models.IntegerField(default=0)
+    likes_count = models.IntegerField(default=0) # Contador de likes do post
+    comments_count = models.IntegerField(default=0) # Contador de comentários do post
+    shares_count = models.IntegerField(default=0) # Contador de compartilhamentos do post
     
     def __str__(self):
-        return f'{self.user.username} - {self.created_at.strftime("%d/%m/%Y")}'
+        return f'{self.user.username} - {self.created_at.strftime("%d/%m/%Y")}' 
     
-    class Meta:
+    class Meta: 
         verbose_name = 'Post'
         verbose_name_plural = 'Posts'
 
@@ -39,6 +39,7 @@ class Comments(models.Model):
     likes_count = models.IntegerField(default=0)
     shares_count = models.IntegerField(default=0)
     
+    # Link externo opcional, imagem e vídeo
     external_link = models.URLField(blank=True, max_length=200) # Link externo opcional
     image = models.ImageField(upload_to='media/images/', blank=True, null=True, verbose_name='Imagem do Comentário')
     video = models.FileField(upload_to='media/videos/', blank=True, null=True, verbose_name='Vídeo do Comentário')
