@@ -1,0 +1,39 @@
+version: '3.9' # Define a versão do Docker Compose
+
+services:
+  web:
+    # Define a imagem a ser usada para o serviço web
+    build:
+      context: . # Define o diretório atual como contexto de build
+      dockerfile: Dockerfile # Especifica o Dockerfile a ser usado
+
+    # Mapeia a porta 8000 do container para a porta 8000 do host
+    ports:
+      - "8000:8000"
+
+    # Monta o diretório atual no container para facilitar o desenvolvimento
+    volumes:
+      - .:/app
+
+    # Define as variáveis de ambiente necessárias para o Django
+    environment:
+      - DEBUG=1 # Ativa o modo de depuração para desenvolvimento
+      - DJANGO_SETTINGS_MODULE=comuna.settings # Define o módulo de configurações do Django
+
+    # Define dependências de outros serviços (se necessário)
+    depends_on:
+      - db
+
+  db:
+    # Usa a imagem oficial do PostgreSQL como banco de dados
+    image: postgres:13
+
+    # Define as variáveis de ambiente para configurar o banco de dados
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: comuna
+
+    # Mapeia a porta 5432 do container para a porta 5432 do host
+    ports:
+      - "5432:5432"

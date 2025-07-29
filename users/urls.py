@@ -7,14 +7,11 @@ urlpatterns = [
     # tela de cadastro
     path('cadastro/', views.cadastro, name='register_view'),
     # tela de recuperação de senha
-    path('recuperar-senha/', views.recuperar_senha, name='recuperar_senha'),
+    #path('recuperar-senha/', views.recuperar_senha, name='recuperar_senha'),
     # tela de perfil
-    path('perfil/<str:username>', views.perfil, name='perfil'),
+    path('perfil/<str:username>', views.profile, name='perfil'),
     # tela de editar perfil
-    path('perfil/<int:id>/editar/', views.editar_perfil, name='edit_profile'),
+    path('perfil/<int:id>/editar/', views.edit_profile, name='edit_profile'),
     # tela de configurações
-    path('configuracoes/', views.configuracoes, name='configuracoes'),
-    # tela de ajuda
-    path('ajuda/', views.ajuda, name='ajuda'),
-    # 
+    #path('configuracoes/', views.configuracoes, name='configuracoes'),
 ]

@@ -25,7 +25,7 @@ def login_view(request):
     return render(request, 'users/login.html')
 
 # --------------------------------------- PAGINA DE CADASTRO ---------------------------------------
-async def register_view(request):
+async def cadastro(request):
     if request.method == 'POST':
         # Obtém os dados do formulário de cadastro
         validador = RegisterUser(

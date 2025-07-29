@@ -4,6 +4,8 @@ def criar_post(author, content=None, image=None, video=None, external_link=None)
     """
     Função para criar um novo post.
     """
+    if not content:
+        raise ValueError("O conteúdo do post não pode ser vazio.")
     post = Post.objects.create(
         author=author,
         content=content if content else None,

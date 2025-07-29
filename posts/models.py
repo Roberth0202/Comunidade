@@ -40,7 +40,7 @@ class Comments(models.Model):
     shares_count = models.IntegerField(default=0)
     
     # Link externo opcional, imagem e vídeo
-    external_link = models.URLField(blank=True, max_length=200) # Link externo opcional
+    external_link = models.URLField(blank=True, null=True, max_length=200) # Link externo opcional
     image = models.ImageField(upload_to='media/images/', blank=True, null=True, verbose_name='Imagem do Comentário')
     video = models.FileField(upload_to='media/videos/', blank=True, null=True, verbose_name='Vídeo do Comentário')
     
