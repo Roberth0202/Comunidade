@@ -2,27 +2,30 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from .models import CustomUser
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.password_validation import get_password_validators, validate_password
+from  django.contrib.auth.views import PasswordChangeDoneView, PasswordChangeView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.contrib import messages
-from comuna.settings import AUTH_PASSWORD_VALIDATORS
 from .services import RegisterUser
 from asgiref.sync import sync_to_async
 
 # ------------------------------------------- PAGINA DE LOGIN ----------------------------------------
-def login_view(request):
+def login(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
+        email = request.POST.get('email')
         password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
+        user = authenticate(request, email=email, password=password)
+        
         # Verifica se o usuário existe e se a senha está correta
         if user is not None:
             login(request, user)
-            return render(request, 'users/profile.html', {'user': user})
+            return redirect('home') # Redireciona para a página inicial após o login bem-sucedido
+        
         # Se o usuário não for encontrado ou a senha estiver incorreta
         else:
-            return render(request, 'users/login.html', {'error': 'Nome ou Senha incorretos'})
+            messages.add_message(request, messages.ERROR, 'Email ou Senha incorretos', extra_tags='erro_login')
+            return render(request, 'login.html')
+        
     # Se o método for GET, renderiza a página de login
-    return render(request, 'users/login.html')
+    return render(request, 'login.html')
 
 # --------------------------------------- PAGINA DE CADASTRO ---------------------------------------
 async def cadastro(request):
@@ -39,11 +42,13 @@ async def cadastro(request):
         
         # Verifica se os dados do usuário são válidos
         validacao = await sync_to_async(validador.is_valid)()
+        # Se a validação falhar, retorna o render do template com a mensagem de erro
         if validacao is not True:
             return validacao # retorna o render do template com a mensagem de erro
         
         # valida a senha de acordo com as regras definidas
         validacao = await sync_to_async(validador.valid_password)()
+        # Se a validação da senha falhar, retorna o render do template com a mensagem de erro
         if validacao is not True:
             return validacao
         
@@ -52,7 +57,7 @@ async def cadastro(request):
         
     
     # Se o método for GET, renderiza a página de cadastro
-    return render(request, 'users/register.html')
+    return render(request, 'register.html')
 
 # ------------------------------------------- FUNÇÃO DE LOGOUT ----------------------------------------
 @login_required
@@ -66,13 +71,17 @@ def logout_view(request):
 def profile(request, username):
     # Obtém o perfil do usuário pelo nome de usuário
     # Se o usuário não for encontrado, retorna um erro 404
-    perfil = get_object_or_404(CustomUser, username=username)
+    user = get_object_or_404(CustomUser, username=username)
     # Verifica se o usuário autenticado é o mesmo do perfil
-    user = request.user
+    profile = user
+    
+    # verifica se o usuário autenticado é o mesmo do perfil
+    perfil_proprio = request.user.is_authenticated and request.user == user
     
     context = {
-        'perfil': perfil,
+        'perfil': profile,
         'user': user,
+        'perfil_proprio': perfil_proprio,
     }
     return render(request, 'users/profile.html', context)
 
@@ -98,3 +107,5 @@ def edit_profile(request, id):
         return redirect('perfil', usuario=user.username)
         # nota: criar condição no template para verificar se o usuário é o mesmo do perfil
     return render(request, 'users/edit_profile.html', {'user': user})
+
+# ----------------------------------------------- PAGINA DE TROCA DE SENHA ----------------------------------------

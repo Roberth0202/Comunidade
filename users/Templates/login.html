@@ -1,0 +1,46 @@
+{% extends 'base/base_logcad.html' %}
+{%  load static %}
+
+{% block content %}
+<div class="icon-login"><img src="{% static 'img/login_icon.png' %}" alt=""></div>
+
+<h1 class="login-title">Login</h1>
+
+<!-- Mensagem de erro -->
+{% if messages %}
+    {% for message in messages %}
+        {% if 'erro_login' in message.extra_tags %}
+            <div class="alert alert-danger" role="alert">
+                {{ message }}
+            </div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+<!-- Formulário de login -->
+<form class="form-group" method="post">
+    {%csrf_token%}
+
+    <!-- Email -->
+    <div class="mb-3">
+        <input type="email" class="form-email" id="email" name="email" placeholder="Email" autofocus autocapitalize="off" required>
+    </div>
+
+    <!-- Senha -->
+    <div class="mb-3">
+        <input type="password" class="form-password" id="password" name="password" placeholder="Senha" required>
+    </div>
+
+    <!-- recuperar senha-->
+    <div class="recuperar-senha">
+        <p><a href="">Esqueci minha senha</a></p>
+    </div>
+
+    <!-- Botão de login -->
+    <button type="submit" class="btn btn-primary">Entrar</button>
+</form>
+
+<div class="register-link">
+    <p>Não tem uma conta? <a href="{% url 'register' %}">Cadastre-se</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,105 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif ;
+}
+body{
+    height: 100vh;
+    background-color: #010027;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.content{
+    background-color: #00001E;
+    min-width: clamp(350px, 50%, 400px);
+    min-height: clamp(520px, 55vh, 600px);
+    border-radius: 15px;
+    box-shadow: 0 0px 300px 15px rgba(98, 22, 250, 0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+}
+
+/* ================================= PAGINA DE LOGIN =================================== */
+
+.icon-login{
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-login img{
+    width: 100px;
+}
+.alert{
+    color: red;
+}
+.form-group{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.mb-3{
+    display: flex;
+    width: 100%;
+    align-items: center;
+    flex-direction: column;
+}
+.mb-3 label{
+    position: relative;
+    left: -48%;
+    font-size: 18px;
+    color: grey;
+}
+.mb-3 input{
+    width: 110%;
+    height: 40px;
+    border-radius: 5px;
+    padding: 0 10px;
+    border: none;
+    background-color: #070132;
+    color: white;
+    font-size: 16px;
+}
+
+.recuperar-senha  a{
+    color: #5d2dfa;
+    text-decoration: none;
+    font-size: 15px;
+    cursor: pointer;
+    outline: none;
+}
+
+.btn{
+    width: 120%;
+    height: 40px;
+    border-radius: 5px;
+    border: none;
+    background-color: #3600e6;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.register-link{
+    margin-top: 50px;
+    font-size: 15px;
+}
+
+.register-link a{
+    color: #5d2dfa;
+    text-decoration: none;
+    font-size: 15px;
+    cursor: pointer;
+    outline: none;
+}

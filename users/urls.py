@@ -5,7 +5,7 @@ urlpatterns = [
     # tela de login
     path('login/', views.login, name='login_view'),
     # tela de cadastro
-    path('cadastro/', views.cadastro, name='register_view'),
+    path('cadastro/', views.cadastro, name='register'),
     # tela de recuperação de senha
     #path('recuperar-senha/', views.recuperar_senha, name='recuperar_senha'),
     # tela de perfil
