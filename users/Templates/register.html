@@ -1,0 +1,33 @@
+{% extends "base/base_logcad.html" %}
+{% load static %}
+{% block content %}
+
+<h1 class="cadastro-title">CADASTRO</h1>
+
+<form class="form-register-group" method="post">
+    {% csrf_token %}
+
+    <div class="mb-2">
+        <input type="text" placeholder="Username" autofocus autocapitalize="off" autocomplete="off" name="username" required>    
+    </div>
+
+    <div class="mb-2">
+        <input type="email" placeholder="Email" autocapitalize="off" autocomplete="off" name="email" required>    
+    </div>
+
+    <div class="mb-2">
+        <input type="email" placeholder="Confirmar email" autocapitalize="off" autocomplete="off" required>    
+    </div>
+
+    <div class="mb-2">
+        <input type="password" placeholder="Senha" autocapitalize="off" autocomplete="off" required>    
+    </div>
+
+    <div class="mb-2">
+        <input type="password" placeholder="Confirmar senha" autocapitalize="off" autocomplete="off" required>    
+    </div>
+
+    <button type="submit" class="btn-cad">Continuar</button>
+</form>
+
+{% endblock %}

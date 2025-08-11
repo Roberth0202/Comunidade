@@ -38,9 +38,13 @@ body{
 .icon-login img{
     width: 100px;
 }
+.login-title{
+    font-family: "Pixelify Sans", sans-serif;
+}
 .alert{
     color: red;
 }
+
 .form-group{
     display: flex;
     flex-direction: column;
@@ -55,14 +59,9 @@ body{
     align-items: center;
     flex-direction: column;
 }
-.mb-3 label{
-    position: relative;
-    left: -48%;
-    font-size: 18px;
-    color: grey;
-}
+
 .mb-3 input{
-    width: 110%;
+    width: 16rem;
     height: 40px;
     border-radius: 5px;
     padding: 0 10px;
@@ -70,6 +69,11 @@ body{
     background-color: #070132;
     color: white;
     font-size: 16px;
+}
+
+.mb-3 input:focus{
+    outline: none;
+    border: 1px solid #5d2dfa;
 }
 
 .recuperar-senha  a{
@@ -81,18 +85,20 @@ body{
 }
 
 .btn{
-    width: 120%;
-    height: 40px;
+    width: 17rem;
+    height: 45px;
     border-radius: 5px;
     border: none;
     background-color: #3600e6;
     color: white;
     font-size: 18px;
+    font-family: "Pixelify Sans", sans-serif;
+    font-weight: 400;
     cursor: pointer;
 }
 
 .register-link{
-    margin-top: 50px;
+    margin-top: 45px;
     font-size: 15px;
 }
 
@@ -102,4 +108,65 @@ body{
     font-size: 15px;
     cursor: pointer;
     outline: none;
+}
+
+/* ================================= PAGINA DE REGISTRO =================================== */
+.cadastro-title{
+    margin-top: 20px;
+    font-size: 30px;
+    font-family: "Pixelify Sans", sans-serif;
+    color: white;
+}
+.form-register-group{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    margin-top: 20px; 
+}
+
+.mb-2{
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+}
+
+.mb-2 label{
+    position: relative;
+    left: 0%;
+    font-size: 18px;
+    color: grey;
+}
+
+.mb-2 input{
+    width: 18.2rem;
+    height: 40px;
+    border-radius: 5px;
+    border: none;
+    background-color: #070132;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    padding-left: 10px;
+    font-family: "Pixelify Sans", sans-serif;
+}
+
+.mb-2 input:focus{
+    outline: none;
+
+    border: 1px solid #5d2dfa;
+}
+
+.btn-cad{
+    width: 18.7rem;
+    height: 50px;
+    border-radius: 5px;
+    border: none;
+    background-color: #3600e6;
+    color: white;
+    font-family: "Pixelify Sans", sans-serif;
+    font-size: 20px;
+    font-weight: 400;
+    cursor: pointer;
+    margin-top: 10px;
 }

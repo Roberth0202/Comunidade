@@ -33,11 +33,12 @@ async def cadastro(request):
         # Obtém os dados do formulário de cadastro
         validador = RegisterUser(
             request,
-            username=request.POST.get('username'),
-            email=request.POST.get('email'),
-            password1=request.POST.get('password1'),
-            password2=request.POST.get('password2'), 
-            data_nascimento=request.POST.get('data_nascimento')
+            username = request.POST.get('username'),
+            email1 = request.POST.get('email1'),
+            email2 = request.POST.get('email2'),
+            password1 = request.POST.get('password1'),
+            password2 = request.POST.get('password2'), 
+            data_nascimento = request.POST.get('data_nascimento')
             )
         
         # Verifica se os dados do usuário são válidos

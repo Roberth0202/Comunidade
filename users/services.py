@@ -6,9 +6,10 @@ from django.contrib.auth.password_validation import validate_password, get_passw
 
 # criar um objeto validador de registro de usuario 
 class RegisterUser:
-    def __init__(self, request, username, email, password1, password2, data_nascimento):
+    def __init__(self, request, username, email1, email2, password1, password2, data_nascimento):
         self.username = username
-        self.email = email
+        self.email1 = email1
+        self.email2 = email2
         self.password1 = password1
         self.password2 = password2
         self.data_nascimento = data_nascimento
@@ -19,19 +20,24 @@ class RegisterUser:
         # Verifica se as senhas são iguais
         if self.password1 != self.password2:
             messages.error(self.request, 'As senhas não coincidem', extra_tags='senhas_diferentes')
-            return render(self.request, 'users/register.html')
+            return render(self.request, 'register.html')
 
         # Verifica se o nome de usuário já existe
-        if CustomUser.objects.filter(username=self.username).exists():
+        if CustomUser.objects.filter(username = self.username).exists():
             messages.error(self.request, 'O nome de usuário já está em uso', extra_tags='usuario_existente')
-            return render(self.request, 'users/register.html')
+            return render(self.request, 'register.html')
 
         # Verifica se o email já existe
-        if CustomUser.objects.filter(email=self.email).exists():
+        if CustomUser.objects.filter(email = self.email1).exists():
             messages.error(self.request, 'O email já está em uso', extra_tags='email_existente')
-            return render(self.request, 'users/register.html')
-        return True
+            return render(self.request, 'register.html')
+    
+        # Verifica se o email1 e email2 são iguais
+        if self.email1 != self.email2:
+            messages.error(self.request, 'Os emails não coincidem', extra_tags='emails_diferentes')
+            return render(self.request, 'register.html')
 
+    # ===================== Método para validar a senha ========================
     # Método para validar a senha
     def valid_password(self):
         # Obtém os validadores de senha configurados
@@ -42,19 +48,18 @@ class RegisterUser:
             validate_password(self.password1, user=None, password_validators=password_validators)
         except Exception as e:
             messages.error(self.request, str(e), extra_tags='erro_senha')
-            return render(self.request, 'users/register.html')
+            return render(self.request, 'register.html')
         
         return True
-        
-    # Método para criar um novo usuário
+
+    #=========================== Método para criar um novo usuário =========================
     def create_user(self):
         # Cria um novo usuário
         user = CustomUser.objects.create_user(
-            username=self.username,
-            password=self.password1,
-            email=self.email,
-            data_nascimento=self.data_nascimento
+            username = self.username,
+            password = self.password1,
+            emai = self.email1,
+            data_nascimento = self.data_nascimento
         )
         user.save()
-        messages.success(self.request, 'Usuário criado com sucesso!', extra_tags='usuario_criado')
         return redirect('login/')
