@@ -1,8 +1,10 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
-from .models import CustomUser
+from .models import CustomUser, EmailVerificationToken
 from django.contrib.auth import authenticate, login, logout
-from  django.contrib.auth.views import PasswordChangeDoneView, PasswordChangeView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
+from django.contrib.auth import authenticate, login as auth_login, logout
+from django.db import IntegrityError
+from django.contrib.auth.views import PasswordChangeDoneView, PasswordChangeView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.contrib import messages
 from .services import RegisterUser
 from asgiref.sync import sync_to_async
@@ -16,7 +18,7 @@ def login(request):
         
         # Verifica se o usuário existe e se a senha está correta
         if user is not None:
-            login(request, user)
+            auth_login(request, user)
             return redirect('home') # Redireciona para a página inicial após o login bem-sucedido
         
         # Se o usuário não for encontrado ou a senha estiver incorreta
@@ -28,33 +30,36 @@ def login(request):
     return render(request, 'login.html')
 
 # --------------------------------------- PAGINA DE CADASTRO ---------------------------------------
-async def cadastro(request):
+def cadastro(request):
     if request.method == 'POST':
         # Obtém os dados do formulário de cadastro
         validador = RegisterUser(
             request,
             username = request.POST.get('username'),
-            email1 = request.POST.get('email1'),
-            email2 = request.POST.get('email2'),
+            email = request.POST.get('email'),
             password1 = request.POST.get('password1'),
             password2 = request.POST.get('password2'), 
             data_nascimento = request.POST.get('data_nascimento')
             )
         
-        # Verifica se os dados do usuário são válidos
-        validacao = await sync_to_async(validador.is_valid)()
-        # Se a validação falhar, retorna o render do template com a mensagem de erro
-        if validacao is not True:
-            return validacao # retorna o render do template com a mensagem de erro
+        # Verifica se os dados do usuário são válidos (sincronamente)
+        if not validador.is_valid():
+            messages.error(request, 'Dados de cadastro inválidos. Verifique os campos e tente novamente.')
+            return render(request, 'register.html')
         
         # valida a senha de acordo com as regras definidas
-        validacao = await sync_to_async(validador.valid_password)()
-        # Se a validação da senha falhar, retorna o render do template com a mensagem de erro
-        if validacao is not True:
-            return validacao
+        if not validador.valid_password():
+            return render(request, 'register.html')
         
-        # se tudo estiver correto, cria o usuário
-        return await sync_to_async(validador.create_user)()
+        # se tudo estiver correto, tenta criar o usuário e captura conflitos de unicidade
+        try:
+            validador.create_user()
+        
+        except IntegrityError:
+            messages.error(request, 'Usuário ou email já existe.')
+            return render(request, 'register.html')
+        
+        return redirect('login')
         
     
     # Se o método for GET, renderiza a página de cadastro
@@ -109,4 +114,28 @@ def edit_profile(request, id):
         # nota: criar condição no template para verificar se o usuário é o mesmo do perfil
     return render(request, 'users/edit_profile.html', {'user': user})
 
-# ----------------------------------------------- PAGINA DE TROCA DE SENHA ----------------------------------------
+# ----------------------------------------------- verificaçao de email  ----------------------------------------
+def verify_email(request, token):
+        # Tenta obter o token de verificação do banco de dados
+        token_obj = get_object_or_404(EmailVerificationToken, token=token)
+        
+        if token_obj.is_used:
+            return redirect('login/')
+        
+        if token_obj.is_expired:
+            return redirect('login/')
+
+        
+        # Marca o email do usuário como verificado e ativa a conta
+        user = token_obj.user
+        user.is_active = True # Ativa a conta do usuário
+        user.email_e_verificado = True # Marca o email como verificado
+        user.save() # Salva as alterações no usuário
+        
+        # Marca o token como usado
+        token_obj.is_used = True
+        token_obj.save()  # Salva as alterações no token
+
+        # Realiza o login do usuário automaticamente
+        login(request, user)
+        return redirect('home/')  # Redireciona para a página inicial ou outra página desejada

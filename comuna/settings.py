@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 from decouple import config
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -89,7 +90,13 @@ DATABASES = {
     }
 }
 
-
+#-------------------------------------------- Configuração para tarefas periódicas ---------------------------------------
+CELERY_BEAT_SCHEDULE = {
+    'deleta_usuarios_nao_verificados': {
+        'task': 'users.services.deleta_usuarios_nao_verificados', # Nome da tarefa e da função definida em services.py
+        'schedule' : crontab(hour=2, minute=0), # Executa todo dia as 2:00 da manhã
+    }
+}
 #--------------------------------------- Validação de senha ---------------------------------------
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -114,6 +121,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 #-------------------------------------------- URL de login ---------------------------------------
 LOGIN_URL = '/login/'
+
+
+#-------------------------------------------- URL do site ---------------------------------------
+SITE_NAME = 'Tordo'
+SITE_URL = 'http://127.0.0.1:8000'
 
 #-------------------------------- Redefinição de senha ----------------------------------
 # para enviar email pro console

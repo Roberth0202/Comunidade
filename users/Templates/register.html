@@ -4,30 +4,50 @@
 
 <h1 class="cadastro-title">CADASTRO</h1>
 
+{% if messages %}
+    <div class="message-container">
+            {% for message in messages %}
+                {% if 'senhas_diferentes' in message.tags%}
+                    <p class="alert-message">{{ message }}</p>
+                {% endif %}
+                {% if 'usuario_existente' in message.tags%}
+                    <p class="alert-message">{{ message }}</p>
+                {% endif %}
+                {% if 'email_existente' in message.tags%}
+                    <p class="alert-message">{{ message }}</p>
+                {% endif %}
+            {% endfor %}
+    </div>
+{% endif %}
+
 <form class="form-register-group" method="post">
     {% csrf_token %}
 
     <div class="mb-2">
-        <input type="text" placeholder="Username" autofocus autocapitalize="off" autocomplete="off" name="username" required>    
+        <input type="text" name="username" placeholder="Username" autofocus autocapitalize="off" autocomplete="off" required>    
     </div>
 
     <div class="mb-2">
-        <input type="email" placeholder="Email" autocapitalize="off" autocomplete="off" name="email" required>    
+        <input type="email" name="email" placeholder="Email" autocapitalize="off" autocomplete="off" required>    
     </div>
 
     <div class="mb-2">
-        <input type="email" placeholder="Confirmar email" autocapitalize="off" autocomplete="off" required>    
+        <input type="password" name="password1" placeholder="Senha" autocapitalize="off" autocomplete="off" required>    
     </div>
 
     <div class="mb-2">
-        <input type="password" placeholder="Senha" autocapitalize="off" autocomplete="off" required>    
+        <input type="password" name="password2" placeholder="Confirmar senha" autocapitalize="off" autocomplete="off" required>    
     </div>
-
+    
     <div class="mb-2">
-        <input type="password" placeholder="Confirmar senha" autocapitalize="off" autocomplete="off" required>    
+        <input type="date" name="data_nascimento" id="data_nascimento" required>
     </div>
 
     <button type="submit" class="btn-cad">Continuar</button>
 </form>
+
+<div class="login-link">
+    <p>Já tem uma conta?<a href="{% url 'login' %}">Entrar</a></p>
+</div>
 
 {% endblock %}

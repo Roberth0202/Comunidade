@@ -14,12 +14,13 @@ body{
 .content{
     background-color: #00001E;
     min-width: clamp(350px, 50%, 400px);
-    min-height: clamp(520px, 55vh, 600px);
+    min-height: clamp(550px, 55%, 600px);
     border-radius: 15px;
     box-shadow: 0 0px 300px 15px rgba(98, 22, 250, 0.4);
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     color: white;
 }
 
@@ -38,9 +39,11 @@ body{
 .icon-login img{
     width: 100px;
 }
+
 .login-title{
     font-family: "Pixelify Sans", sans-serif;
 }
+
 .alert{
     color: red;
 }
@@ -117,12 +120,28 @@ body{
     font-family: "Pixelify Sans", sans-serif;
     color: white;
 }
+.message-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+    height: 20px;
+    z-index: 100;
+    color: aliceblue;
+}
+.alert-message{
+    color: red;
+    z-index: 10;
+    font-size: 14px;
+
+}
+
 .form-register-group{
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 25px;
-    margin-top: 20px; 
+    margin-top: 10px; 
 }
 
 .mb-2{
@@ -148,7 +167,6 @@ body{
     font-size: 16px;
     font-weight: 700;
     padding-left: 10px;
-    font-family: "Pixelify Sans", sans-serif;
 }
 
 .mb-2 input:focus{
@@ -168,5 +186,18 @@ body{
     font-size: 20px;
     font-weight: 400;
     cursor: pointer;
-    margin-top: 10px;
+}
+
+.login-link{
+    margin-top: 15px;
+}
+
+.login-link a{
+    color: #5d2dfa;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    outline: none;
+    margin-left: 5px;
 }

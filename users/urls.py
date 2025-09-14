@@ -3,11 +3,11 @@ from . import views
 
 urlpatterns = [
     # tela de login
-    path('login/', views.login, name='login_view'),
+    path('login/', views.login, name='login'),
     # tela de cadastro
     path('cadastro/', views.cadastro, name='register'),
-    # tela de recuperação de senha
-    #path('recuperar-senha/', views.recuperar_senha, name='recuperar_senha'),
+    # verificação de email
+    path('verify-email/<uuid:token>/', views.verify_email, name='verify_email'),
     # tela de perfil
     path('perfil/<str:username>', views.profile, name='perfil'),
     # tela de editar perfil
