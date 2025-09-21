@@ -70,7 +70,7 @@ class RegisterUser:
             email = self.email,
             data_nascimento = self.data_nascimento,
             is_active = False, # Define o usuário como inativo inicialmente
-            email_e_verificado = False, # Define o email como não verificado inicialmente
+            e_verificado = False, # Define o email como não verificado inicialmente
         )
         
         return user.save() # Confirma a transação e salva o usuário no banco de dados
@@ -124,8 +124,8 @@ def deleta_usuarios_nao_verificado():
     
     # filtra os usuários que não verificaram o email e foram criados a mais de 7 dias   
     usuarios_nao_verificados = CustomUser.objects.filter(
-        email_e_verificado=False, 
-        data_criacao__lte=sete_dias_atras) # __lte = "less than or equal" (menor ou igual)
+        e_verificado=False, 
+        data_criacao__lte = sete_dias_atras) # __lte = "less than or equal" (menor ou igual)
     
     count = usuarios_nao_verificados.count() # conta quantos usuários serão deletados
     usuarios_nao_verificados.delete()
