@@ -1,7 +1,6 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from .models import CustomUser, EmailVerificationToken
-from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.db import IntegrityError
 from django.contrib.auth.views import PasswordChangeDoneView, PasswordChangeView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
@@ -129,7 +128,7 @@ def verify_email(request, token):
         # Marca o email do usuário como verificado e ativa a conta
         user = token_obj.user
         user.is_active = True # Ativa a conta do usuário
-        user.email_e_verificado = True # Marca o email como verificado
+        user.e_verificado = True # Marca o email como verificado
         user.save() # Salva as alterações no usuário
         
         # Marca o token como usado
@@ -137,5 +136,5 @@ def verify_email(request, token):
         token_obj.save()  # Salva as alterações no token
 
         # Realiza o login do usuário automaticamente
-        login(request, user)
+        auth_login(request, user)
         return redirect('home/')  # Redireciona para a página inicial ou outra página desejada

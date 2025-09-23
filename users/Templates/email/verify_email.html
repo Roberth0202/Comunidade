@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificação de Email - Comuna</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            padding: 20px;
+            border: 1px solid #ddd;
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .header h1 {
+            color: #4a6da7;
+            margin-bottom: 10px;
+        }
+        .content {
+            padding: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            background-color: #4a6da7;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        .token-info {
+            background-color: #eee;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-family: monospace;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Comuna</h1>
+            <p>Verificação de Email</p>
+        </div>
+        
+        <div class="content">
+            <p>Olá {{ user.username }},</p>
+            
+            <p>Obrigado por se cadastrar na nossa plataforma. Para concluir seu cadastro ative sua conta, por favor clique no botão abaixo para verificar seu endereço de email:</p>
+            
+            <div style="text-align: center;">
+                <a href="{{ verify_url }}" class="button">Verificar meu email</a>
+            </div>
+            
+            <p>Ou você pode copiar e colar o seguinte link no seu navegador:</p>
+            
+            <div class="token-info">
+                {{ verify_url }}
+            </div>
+            
+            <p>Se você não solicitou esta verificação, por favor ignore este email.</p>
+            
+            <p>Este link de verificação expirará em 24 horas.</p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; {% now "Y" %} Comuna. Todos os direitos reservados.</p>
+            <p>Este é um email automático, por favor não responda.</p>
+        </div>
+    </div>
+</body>
+</html>
