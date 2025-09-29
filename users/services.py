@@ -5,11 +5,12 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.utils.html import strip_tags
 from django.template.loader import render_to_string
-from django.contrib.auth import login
 from django.contrib.auth.password_validation import validate_password, get_password_validators
 from django.utils import timezone
 from datetime import timedelta
 from celery import shared_task
+import re
+
 
 # criar um objeto validador de registro de usuario 
 class RegisterUser:
@@ -25,20 +26,54 @@ class RegisterUser:
     def is_valid(self):
         is_valid = True
         
+        # Verifica se os campos obrigatórios não estão vazios
+        if not self.username:
+            messages.error(self.request, 'O nome de usuário é obrigatório.', extra_tags='usuario_vazio')
+            is_valid = False
+            return is_valid
+            
+        if not self.email:
+            messages.error(self.request, 'O email é obrigatório.', extra_tags='email_vazio')
+            is_valid = False
+            return is_valid
+            
+        if not self.password1:
+            messages.error(self.request, 'A senha é obrigatória.', extra_tags='senha_vazia')
+            is_valid = False
+            return is_valid
+            
+        if not self.password2:
+            messages.error(self.request, 'A confirmação de senha é obrigatória.', extra_tags='senha2_vazia')
+            is_valid = False
+            return is_valid
+        
         # Verifica se as senhas são iguais
         if self.password1 != self.password2:
             messages.error(self.request, 'As senhas não coincidem', extra_tags='senhas_diferentes')
             is_valid = False
             return is_valid
 
+        # Verifica se o nome de usuário tem pelo menos 3 caracteres
+        if len(self.username) < 3:
+            messages.error(self.request, 'O nome de usuário deve ter pelo menos 3 caracteres.', extra_tags='usuario_curto')
+            is_valid = False
+            return is_valid
+
+        # Verifica se o email tem formato válido
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, self.email):
+            messages.error(self.request, 'Por favor, insira um email válido.', extra_tags='email_invalido')
+            is_valid = False
+            return is_valid
+
         # Verifica se o nome de usuário já existe
-        if CustomUser.objects.filter(username = self.username).exists():
+        if CustomUser.objects.filter(username=self.username).exists():
             messages.error(self.request, 'O nome de usuário já está em uso.', extra_tags='usuario_existente')
             is_valid = False
             return is_valid
             
         # Verifica se o email já existe
-        if CustomUser.objects.filter(email = self.email).exists():
+        if CustomUser.objects.filter(email=self.email).exists():
             messages.error(self.request, 'O email já está em uso.', extra_tags='email_existente')
             is_valid = False
             return is_valid
@@ -46,18 +81,63 @@ class RegisterUser:
         return is_valid
 
     # ====================================== Método para validar a senha ==========================================
-    # Método para validar a senha
     def valid_password(self):
-        # Obtém os validadores de senha configurados
+        # Verifica se a senha não está vazia
+        if not self.password1:
+            messages.error(self.request, 'A senha é obrigatória.', extra_tags='erro_senha')
+            return False
+            
+        # Verifica se a senha tem pelo menos 8 caracteres
+        if len(self.password1) < 8:
+            messages.error(self.request, 'A senha deve ter pelo menos 8 caracteres.', extra_tags='erro_senha')
+            return False
+            
+        # Verifica se a senha contém caracteres especiais
+        special_chars = r'[!@#$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?]'
+        if not re.search(special_chars, self.password1):
+            messages.error(self.request, 'A senha deve conter pelo menos um caractere especial (!@#$%^&*()_+-=[]{}|;:,.<>?).', extra_tags='erro_senha')
+            return False
+            
+        # Verifica se a senha contém pelo menos uma letra maiúscula
+        if not re.search(r'[A-Z]', self.password1):
+            messages.error(self.request, 'A senha deve conter pelo menos uma letra maiúscula.', extra_tags='erro_senha')
+            return False
+            
+        # Verifica se a senha contém pelo menos uma letra minúscula
+        if not re.search(r'[a-z]', self.password1):
+            messages.error(self.request, 'A senha deve conter pelo menos uma letra minúscula.', extra_tags='erro_senha')
+            return False
+            
+        # Verifica se a senha contém pelo menos um número
+        if not re.search(r'[0-9]', self.password1):
+            messages.error(self.request, 'A senha deve conter pelo menos um número.', extra_tags='erro_senha')
+            return False
+        
+        # Obtém os validadores de senha configurados do Django
         password_validators = get_password_validators(settings.AUTH_PASSWORD_VALIDATORS)
         
         try:
-            # Valida a senha de acordo com as regras definidas
-            validate_password(self.password1, password_validators = password_validators) # 
+            # Valida a senha usando os validadores do Django
+            validate_password(self.password1, password_validators=password_validators)
             
         except Exception as e:
-            messages.error(self.request, str(e), extra_tags='erro_senha')
-            return render(self.request, 'register.html')
+            # Converte as mensagens de erro do Django para português
+            error_messages = {
+                'This password is too short. It must contain at least 8 characters.': 'A senha é muito curta. Deve conter pelo menos 8 caracteres.',
+                'This password is too common.': 'Esta senha é muito comum. Escolha uma senha mais segura.',
+                'This password is entirely numeric.': 'A senha não pode ser apenas numérica.',
+                'The password is too similar to the username.': 'A senha é muito similar ao nome de usuário.',
+                'The password is too similar to the email.': 'A senha é muito similar ao email.',
+            }
+            
+            error_message = str(e)
+            for english_msg, portuguese_msg in error_messages.items():
+                if english_msg in error_message:
+                    error_message = portuguese_msg
+                    break
+                    
+            messages.error(self.request, error_message, extra_tags='erro_senha')
+            return False
         
         return True
         

@@ -12,7 +12,7 @@ body{
 }
 
 .content{
-    background-color: #00001E;
+    background-color: rgba(0, 0, 30, 0.8);
     min-width: clamp(350px, 50%, 400px);
     min-height: clamp(550px, 55%, 600px);
     border-radius: 15px;
