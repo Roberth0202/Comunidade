@@ -13,7 +13,8 @@ body{
 
 .content{
     background-color: rgba(0, 0, 30, 0.8);
-    min-width: clamp(350px, 50%, 400px);
+    width: 95%;
+    max-width: 350px;
     min-height: clamp(550px, 55%, 600px);
     border-radius: 15px;
     box-shadow: 0 0px 300px 15px rgba(98, 22, 250, 0.4);
@@ -29,8 +30,6 @@ body{
 .icon-login{
     width: 90px;
     height: 90px;
-    border-radius: 50%;
-    margin-top: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -45,7 +44,18 @@ body{
 }
 
 .alert{
-    color: red;
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+}
+.alert-error{
+    color: #b10213;
+}
+
+.alert-success{
+    color: #00ad26;
 }
 
 .form-group{
@@ -53,7 +63,7 @@ body{
     flex-direction: column;
     align-items: center;
     gap: 20px;
-    margin-top: 30px;
+    margin-top: 5px;
 }
 
 .mb-3{
@@ -64,7 +74,7 @@ body{
 }
 
 .mb-3 input{
-    width: 16rem;
+    width: 95%;
     height: 40px;
     border-radius: 5px;
     padding: 0 10px;
@@ -88,7 +98,7 @@ body{
 }
 
 .btn{
-    width: 17rem;
+    width: 101.5%;
     height: 45px;
     border-radius: 5px;
     border: none;
@@ -101,7 +111,7 @@ body{
 }
 
 .register-link{
-    margin-top: 45px;
+    margin-top: 30px;
     font-size: 15px;
 }
 
@@ -115,7 +125,6 @@ body{
 
 /* ================================= PAGINA DE REGISTRO =================================== */
 .cadastro-title{
-    margin-top: 20px;
     font-size: 30px;
     font-family: "Pixelify Sans", sans-serif;
     color: white;
@@ -123,17 +132,19 @@ body{
 .message-container{
     display: flex;
     flex-direction: column;
+    align-self: center;
     align-items: center;
-    margin-top: 10px;
     height: 20px;
+    margin-bottom: 13px;
     z-index: 100;
-    color: aliceblue;
+
 }
+
 .alert-message{
     color: red;
     z-index: 10;
     font-size: 14px;
-
+    text-align: center;
 }
 
 .form-register-group{

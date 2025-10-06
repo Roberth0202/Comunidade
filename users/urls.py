@@ -14,6 +14,8 @@ urlpatterns = [
     path('perfil/<int:id>/editar/', views.edit_profile, name='edit_profile'),
     # recuperação de senha
     path('password-reset/', views.password_reset, name='password_reset'),
+    # confirmação de recuperação de senha
+    path('password-reset-confirm/<uuid:token>/', views.password_reset_confirm, name='password_reset_confirm'),
     # tela de configurações
     #path('configuracoes/', views.configuracoes, name='configuracoes'),
 ]

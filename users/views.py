@@ -1,14 +1,17 @@
-from django.conf import Settings, settings
+from django.conf import settings
+from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
+from django.utils.html import strip_tags
 from .models import CustomUser, EmailVerificationToken, PasswordResetToken
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.db import IntegrityError
-from django.contrib.auth.views import PasswordChangeDoneView, PasswordChangeView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
+from django.template.loader import render_to_string
 from django.contrib import messages
-from .services import RegisterUser
-from asgiref.sync import sync_to_async
-from .forms import SolicitacaoRedefinicaoSenhaForm
+from .services import RegisterUser, validate_password_strength as validate_password
+from .forms import SolicitacaoRedefinicaoSenhaForm, RedefinicaoSenhaForm
+from django.utils import timezone
+from datetime import timedelta
 
 # ------------------------------------------- PAGINA DE LOGIN ----------------------------------------
 def login(request):
@@ -24,7 +27,7 @@ def login(request):
         
         # Se o usuário não for encontrado ou a senha estiver incorreta
         else:
-            messages.add_message(request, messages.ERROR, 'Email ou Senha incorretos', extra_tags='erro_login')
+            messages.error(request, 'Email ou Senha incorretos')
             return render(request, 'login.html')
         
     # Se o método for GET, renderiza a página de login
@@ -43,26 +46,39 @@ def cadastro(request):
             data_nascimento = request.POST.get('data_nascimento')
             )
         
-        # Verifica se os dados do usuário são válidos (sincronamente)
+        # Verifica se os dados do usuário são válidos (formato, etc.)
         if not validador.is_valid():
-            messages.error(request, 'Dados de cadastro inválidos. Verifique os campos e tente novamente.')
             return render(request, 'register.html')
         
         # valida a senha de acordo com as regras definidas
-        if not validador.valid_password():
+        if not validador.validate_password():
             return render(request, 'register.html')
         
-        # se tudo estiver correto, tenta criar o usuário e captura conflitos de unicidade
+        # Agora, lida com a lógica de existência de usuário/email
         try:
-            validador.create_user()
+            # 1. Verifica se o nome de usuário já existe
+            if CustomUser.objects.filter(username=validador.username).exists():
+                messages.error(request, 'Este nome de usuário já está em uso. Por favor, escolha outro.')
+                return render(request, 'register.html')
+
+            # 2. Verifica se o email já existe
+            if CustomUser.objects.filter(email=validador.email).exists():
+                # Não revela que o e-mail já existe. redireciona pra pagina login.
+                # Opcionalmente, você pode enviar um e-mail para o endereço existente aqui.
+                messages.success(request, 'Se uma conta com este e-mail existir, um link de verificação será enviado em breve.')
+                return redirect('login')
+
+            # 3. Se tudo estiver ok, cria o usuário e envia o email de verificação
+            user = validador.create_user()
+            validador.send_email_verification(user)
+            messages.success(request, 'Cadastro realizado com sucesso! Um e-mail de verificação foi enviado para o seu endereço.')
+            return redirect('login')
         
         except IntegrityError:
-            messages.error(request, 'Usuário ou email já existe.')
-            return render(request, 'register.html')
+            # Fallback para o caso de uma race condition (dois cadastros ao mesmo tempo)
+            messages.error(request, 'Este nome de usuário ou e-mail já está em uso. Por favor, tente outro.')
+            return render(request, 'register.html', context)
         
-        return redirect('login')
-        
-    
     # Se o método for GET, renderiza a página de cadastro
     return render(request, 'register.html')
 
@@ -149,31 +165,72 @@ def password_reset(request):
         form = SolicitacaoRedefinicaoSenhaForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
-            
             try:
                 user = CustomUser.objects.get(email=email)
-                
                 token = PasswordResetToken.objects.create(user=user)
+                password_reset_url = f'{settings.SITE_URL}/password-reset-confirm/{token.token}/'
                 
-                password_reset_url = f'{settings.SITE_URL}/password-reset/{token.token}/'
+                html_content= render_to_string('email/password_reset_email.html',{
+                    'user':user,
+                    'password_reset_url':password_reset_url,
+                    'SITE_NAME':settings.SITE_NAME,
+                    'SITE_URL': settings.SITE_URL,
+                })
                 
-                # por enquanto imprimir no console pra ver se está funcionando
-                print(f"link de redefinição de senha do {user.email}: {password_reset_url}")
+                text_content = strip_tags(html_content)
                 
-                # logica de envio de email aqui
+                send_mail(
+                    subject="Redefinição de senha",
+                    message = text_content,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],
+                    html_message=html_content,
+                )
                 
-                
-                messages.success(request,'Se um usuário com este email existir, um link de redefinição foi enviado.', extra_tags='email_reset_passoword')
-                return redirect('password_reset')
+                return render(request, 'password_reset.html', {'success': True})
                 
             except CustomUser.DoesNotExist:
-                messages.success(request,'Se um usuário com este email existir, um link de redefinição foi enviado.', extra_tags='email_reset_password')
-                return redirect('password_reset')
+                return render(request, 'password_reset.html', {'success': True})
+        # If form is NOT valid, we fall through to the final render call
     else:
+        # This is a GET request, so create a blank form
         form = SolicitacaoRedefinicaoSenhaForm()
-        
+    
+    # This single return handles both GET requests and POST requests with invalid forms
     return render(request, 'password_reset.html', {'form': form})
-        
 
 # criar pagina para colocar a senha nova
+def password_reset_confirm(request, token):
+    try:
+        token_obj = get_object_or_404(PasswordResetToken, token=token)
+        user =token_obj.user
+        
+        if token_obj.created_at < timezone.now() - timedelta(hours=1):
+            messages.error(request, 'Token expirado. Por favor, solicite uma nova redefinição de senha.')
+            token_obj.delete() # Remove o token expirado
+            return redirect('password_reset')
+        
+    except PasswordResetToken.DoesNotExist:
+        messages.error(request, 'Token inválido ou expirado.')
+        return redirect('password_reset')
+    
+    if request.method == "POST":
+        form = RedefinicaoSenhaForm(request.POST)
+        if form.is_valid():
+            nova_senha = form.cleaned_data['nova_senha']
+            
+            # Atualiza a senha do usuário
+            user.set_password(nova_senha)
+            user.save()
+            
+            # Remove o token após a redefinição bem-sucedida
+            token_obj.delete()
+            
+            messages.success(request, 'Sua senha foi redefinida com sucesso!')
+            return redirect('login')
+    
+    else:
+        form = RedefinicaoSenhaForm()
+    
+    return render(request, 'password_reset_confirm.html', {'form': form})
         

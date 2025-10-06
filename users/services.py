@@ -6,10 +6,39 @@ from django.core.mail import send_mail
 from django.utils.html import strip_tags
 from django.template.loader import render_to_string
 from django.contrib.auth.password_validation import validate_password, get_password_validators
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from datetime import timedelta
 from celery import shared_task
 import re
+
+
+# ====================================== Validação de Senha (Refatorado) =======================================
+def validate_password_strength(password):
+    """
+    Executa uma série de validações de força da senha.
+    Levanta ValidationError em caso de falha.
+    """
+    if not password:
+        raise ValidationError('A senha é obrigatória.', code='senha_vazia')
+    
+    if len(password) < 8:
+        raise ValidationError('A senha deve ter pelo menos 8 caracteres.', code='senha_curta')
+    
+    if not re.search(r'[!@#$%^&*()_+\-=\[\]{}|;:,.<>/?]', password):
+        raise ValidationError('A senha deve conter pelo menos um caractere especial (!@#$%^&*()_+-=[]{}|;:,.<>?).', code='sem_caractere_especial')
+    
+    if not re.search(r'[A-Z]', password):
+        raise ValidationError('A senha deve conter pelo menos uma letra maiúscula.', code='sem_maiuscula')
+    
+    if not re.search(r'[a-z]', password):
+        raise ValidationError('A senha deve conter pelo menos uma letra minúscula.', code='sem_minuscula')
+    
+    if not re.search(r'[0-9]', password):
+        raise ValidationError('A senha deve conter pelo menos um número.', code='sem_numero')
+    
+    password_validators = get_password_validators(settings.AUTH_PASSWORD_VALIDATORS)
+    validate_password(password, password_validators=password_validators)
 
 
 # criar um objeto validador de registro de usuario 
@@ -66,94 +95,21 @@ class RegisterUser:
             is_valid = False
             return is_valid
 
-        # Verifica se o nome de usuário já existe
-        if CustomUser.objects.filter(username=self.username).exists():
-            messages.error(self.request, 'O nome de usuário já está em uso.', extra_tags='usuario_existente')
-            is_valid = False
-            return is_valid
-            
-        # Verifica se o email já existe
-        if CustomUser.objects.filter(email=self.email).exists():
-            messages.error(self.request, 'O email já está em uso.', extra_tags='email_existente')
-            is_valid = False
-            return is_valid
-    
         return is_valid
 
-    # ====================================== Método para validar a senha ==========================================
-    def valid_password(self):
-        # Verifica se a senha não está vazia
-        if not self.password1:
-            messages.error(self.request, 'A senha é obrigatória.', extra_tags='erro_senha')
-            return False
-            
-        # Verifica se a senha tem pelo menos 8 caracteres
-        if len(self.password1) < 8:
-            messages.error(self.request, 'A senha deve ter pelo menos 8 caracteres.', extra_tags='erro_senha')
-            return False
-            
-        # Verifica se a senha contém caracteres especiais
-        special_chars = r'[!@#$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?]'
-        if not re.search(special_chars, self.password1):
-            messages.error(self.request, 'A senha deve conter pelo menos um caractere especial (!@#$%^&*()_+-=[]{}|;:,.<>?).', extra_tags='erro_senha')
-            return False
-            
-        # Verifica se a senha contém pelo menos uma letra maiúscula
-        if not re.search(r'[A-Z]', self.password1):
-            messages.error(self.request, 'A senha deve conter pelo menos uma letra maiúscula.', extra_tags='erro_senha')
-            return False
-            
-        # Verifica se a senha contém pelo menos uma letra minúscula
-        if not re.search(r'[a-z]', self.password1):
-            messages.error(self.request, 'A senha deve conter pelo menos uma letra minúscula.', extra_tags='erro_senha')
-            return False
-            
-        # Verifica se a senha contém pelo menos um número
-        if not re.search(r'[0-9]', self.password1):
-            messages.error(self.request, 'A senha deve conter pelo menos um número.', extra_tags='erro_senha')
-            return False
-        
-        # Obtém os validadores de senha configurados do Django
-        password_validators = get_password_validators(settings.AUTH_PASSWORD_VALIDATORS)
-        
-        try:
-            # Valida a senha usando os validadores do Django
-            validate_password(self.password1, password_validators=password_validators)
-            
-        except Exception as e:
-            # Converte as mensagens de erro do Django para português
-            error_messages = {
-                'This password is too short. It must contain at least 8 characters.': 'A senha é muito curta. Deve conter pelo menos 8 caracteres.',
-                'This password is too common.': 'Esta senha é muito comum. Escolha uma senha mais segura.',
-                'This password is entirely numeric.': 'A senha não pode ser apenas numérica.',
-                'The password is too similar to the username.': 'A senha é muito similar ao nome de usuário.',
-                'The password is too similar to the email.': 'A senha é muito similar ao email.',
-            }
-            
-            error_message = str(e)
-            for english_msg, portuguese_msg in error_messages.items():
-                if english_msg in error_message:
-                    error_message = portuguese_msg
-                    break
-                    
-            messages.error(self.request, error_message, extra_tags='erro_senha')
-            return False
-        
-        return True
-        
     #====================================== Método para criar um novo usuário ===================================
     def create_user(self):
         # Cria um novo usuário inativo ate verificar email
         user = CustomUser.objects.create_user(
             username = self.username,
-            password = self.password1,
+            password = password1,
             email = self.email,
             data_nascimento = self.data_nascimento,
             is_active = False, # Define o usuário como inativo inicialmente
             e_verificado = False, # Define o email como não verificado inicialmente
         )
         
-        return user.save() # Confirma a transação e salva o usuário no banco de dados
+        return user # Confirma a transação e salva o usuário no banco de dados
 
     # ================================ Método para enviar email de verificação ===================================
     def send_email_verification(self, user):
@@ -191,9 +147,6 @@ class RegisterUser:
         except Exception as e:
             print(f'Erro ao enviar email de verificação: {e}')
             return False
-        
-    # ================================ Método para verificar o email ===================================
-    
 
 # função para deletar usuários não verificados depois de 7 dias
 @shared_task # Transforma essa função em uma tarefa que pode ser executada em background

@@ -9,11 +9,9 @@
 <!-- Mensagem de erro -->
 {% if messages %}
     {% for message in messages %}
-        {% if 'erro_login' in message.extra_tags %}
-            <div class="alert alert-danger" role="alert">
-                {{ message }}
-            </div>
-        {% endif %}
+        <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+        </div>
     {% endfor %}
 {% endif %}
 
@@ -37,7 +35,7 @@
     </div>
 
     <!-- Botão de login -->
-    <button type="submit" class="btn btn-primary">Entrar</button>
+    <button type="submit" class="btn">Entrar</button>
 </form>
 
 <div class="register-link">
