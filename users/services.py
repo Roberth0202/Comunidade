@@ -1,6 +1,5 @@
 from .models import CustomUser, EmailVerificationToken
 from django.contrib import messages
-from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
 from django.core.mail import send_mail
 from django.utils.html import strip_tags
@@ -9,7 +8,6 @@ from django.contrib.auth.password_validation import validate_password, get_passw
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from datetime import timedelta
-from celery import shared_task
 import re
 
 
@@ -97,12 +95,21 @@ class RegisterUser:
 
         return is_valid
 
+    def validate_password(self):
+        try:
+            validate_password_strength(self.password1)
+            return True
+        except ValidationError as e:
+            for message in e.messages:
+                messages.error(self.request, message)
+            return False
+
     #====================================== Método para criar um novo usuário ===================================
     def create_user(self):
         # Cria um novo usuário inativo ate verificar email
         user = CustomUser.objects.create_user(
             username = self.username,
-            password = password1,
+            password = self.password1,
             email = self.email,
             data_nascimento = self.data_nascimento,
             is_active = False, # Define o usuário como inativo inicialmente
@@ -149,7 +156,6 @@ class RegisterUser:
             return False
 
 # função para deletar usuários não verificados depois de 7 dias
-@shared_task # Transforma essa função em uma tarefa que pode ser executada em background
 def deleta_usuarios_nao_verificado():
     
     # calcula uma data 7 dias atrás
@@ -163,5 +169,3 @@ def deleta_usuarios_nao_verificado():
     count = usuarios_nao_verificados.count() # conta quantos usuários serão deletados
     usuarios_nao_verificados.delete()
     return f'Deletados {count} usuários não verificados.'
-    
-    

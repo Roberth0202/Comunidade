@@ -1,5 +1,6 @@
 from django import forms
-from .services import validate_password
+from django.core.exceptions import ValidationError
+from .services import validate_password_strength as validate_password
 
 class SolicitacaoRedefinicaoSenhaForm(forms.Form):
     email = forms.EmailField(
@@ -28,10 +29,12 @@ class RedefinicaoSenhaForm(forms.Form):
 
         if nova_senha and confirmar_senha:
             if nova_senha != confirmar_senha:
-                raise forms.ValidationError("As senhas não coincidem.")
-            
-            # valida a senha de acordo com as regras definidas
-            try:
-                validate_password(nova_senha)
-            except ValidationError as e:
-                raise forms.ValidationError(e.messages)
+                self.add_error('confirmar_senha', "As senhas não coincidem.")
+            else:
+                # valida a senha de acordo com as regras definidas
+                try:
+                    validate_password(nova_senha)
+                except ValidationError as e:
+                    self.add_error('nova_senha', e)
+        
+        return cleaned_data

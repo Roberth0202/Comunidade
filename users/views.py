@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout
 from django.db import IntegrityError
 from django.template.loader import render_to_string
 from django.contrib import messages
-from .services import RegisterUser, validate_password_strength as validate_password
+from .services import RegisterUser
 from .forms import SolicitacaoRedefinicaoSenhaForm, RedefinicaoSenhaForm
 from django.utils import timezone
 from datetime import timedelta
@@ -203,7 +203,7 @@ def password_reset(request):
 def password_reset_confirm(request, token):
     try:
         token_obj = get_object_or_404(PasswordResetToken, token=token)
-        user =token_obj.user
+        user = token_obj.user
         
         if token_obj.created_at < timezone.now() - timedelta(hours=1):
             messages.error(request, 'Token expirado. Por favor, solicite uma nova redefinição de senha.')
@@ -233,4 +233,3 @@ def password_reset_confirm(request, token):
         form = RedefinicaoSenhaForm()
     
     return render(request, 'password_reset_confirm.html', {'form': form})
-        

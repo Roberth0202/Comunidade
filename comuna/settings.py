@@ -78,6 +78,7 @@ DATABASES = {
     }
 }
 
+
 #-------------------------------------------- Configuração para tarefas periódicas ---------------------------------------
 CELERY_BEAT_SCHEDULE = {
     'deleta_usuarios_nao_verificados': {

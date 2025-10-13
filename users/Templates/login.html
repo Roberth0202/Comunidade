@@ -15,26 +15,21 @@
     {% endfor %}
 {% endif %}
 
-<!-- Formulário de login -->
-<form class="form-group" method="post">
+<form class="form-group" method="post" autocomplete="off">
     {%csrf_token%}
 
-    <!-- Email -->
     <div class="mb-3">
         <input type="email" class="form-email" id="email" name="email" placeholder="Email" autofocus autocapitalize="off" required>
     </div>
 
-    <!-- Senha -->
     <div class="mb-3">
         <input type="password" class="form-password" id="password" name="password" placeholder="Senha" required>
     </div>
 
-    <!-- recuperar senha-->
     <div class="recuperar-senha">
         <p><a href="{% url 'password_reset' %}">Esqueci minha senha</a></p>
     </div>
 
-    <!-- Botão de login -->
     <button type="submit" class="btn">Entrar</button>
 </form>
 
