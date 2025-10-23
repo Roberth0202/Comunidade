@@ -1,0 +1,158 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+body {
+    background-color: black;
+    width: 100%;
+    height: 100%;
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+.container-menu{
+    position: relative;
+    width: 350px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.shadow-card{
+    display: flex;
+    border-radius: 15px;
+    background-image: radial-gradient(
+        circle at 50% 30%,
+        rgba(150, 70, 255, 0.3),
+        rgba(150, 70, 255, 0) 100%);
+    margin-top: 20px;
+    width: 90%;
+    height: 130px;
+}
+
+.usuario{
+    color: #fff;
+    box-shadow: 0px 0px 30px 0px rgba(150, 70, 255, 0.4);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(150, 70, 255, 0.4);
+    width: 100%;
+    height: 130px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 15px;
+}
+
+.usuario-info{
+    display: flex;
+    align-items: center;
+    margin-right: 43%;
+    gap: 10px;
+}
+
+.avatar{
+    width: 61px;
+    height: 61px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 100%;
+}
+.avatar img{
+    width: 65px;
+    height: 65px;
+    display: flex;
+}
+.username{
+    color: #fff;
+    font-size: 18px;
+    display: flex;
+}
+
+.username p{
+    margin: 0;
+    padding: 0;
+}
+
+.info-follow{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 15px;
+    margin-right: 25%;
+    gap: 20px;
+}
+
+.menu-principal{
+    display: flex;
+    width: 90%;
+    height: 59%;
+    margin-top: 20px;
+}
+
+.menu-principal ul{
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    width: 100%;
+    height: 97%;
+    gap: 7px;
+}
+.menu-principal ul li{
+    list-style: none;
+}
+
+.menu-principal ul li a{
+    display: flex;
+    align-items: center;
+    font-size: larger;
+    font-weight: 500;
+    border-radius: 15px;
+    width: 100%;
+    height: 50px;
+    color: #9CA3AF;
+    text-decoration-line: none;
+}
+
+.menu-principal ul li a span{
+    margin-left: 13px;
+}
+
+.menu-principal ul li a:hover{
+    background: linear-gradient(50deg, rgba(138, 48, 255, 0.521), rgba(150, 70, 255, 1));
+    box-shadow: 5px 5px 10px 0px rgba(150, 70, 255, 0.4);
+    backdrop-filter: blur(5px);
+    color: #fff;
+}
+
+.menu-sair{
+    display: flex;
+    align-items: center;
+    margin-top: 30px;
+    width: 90%;
+    height: 50px;
+    text-decoration-line: none;
+}
+
+.menu-sair a{
+    color: #9CA3AF;
+    display: flex;
+    align-items: center;
+    font-size: larger;
+    text-decoration: none;
+    border-radius: 15px;
+    width: 100%;
+    height: 100%;
+}
+
+.menu-sair a:hover{
+    background-color: rgb(233, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+}
+
+.menu-sair a span{
+    margin-left: 13px;
+}
+
+.menu-sair a:hover span{
+    color: rgb(233, 0, 0);
+}

@@ -4,13 +4,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from asgiref.sync import sync_to_async
 from .models import Post, Comments
-from.services import criar_post, criar_comentario
+from .services import criar_post, criar_comentario
+from users.services import get_follow_counts
 import asyncio
 
 
 # pagina feed para ver todos os posts
-@login_required
-async def feed_view(request):
+@login_required(login_url='login')
+def feed_view(request):
     
     #cria um post do usuario logado
     if request.method == 'POST':
@@ -26,7 +27,7 @@ async def feed_view(request):
     
         #cria um novo post
         try:
-            post = await sync_to_async(criar_post)(
+            post = criar_post(
                 author=request.user,
                 content=content,
                 image=image,
@@ -41,20 +42,25 @@ async def feed_view(request):
             return redirect('feed_view')
     
     # busca todos os posts do banco de dados
-    posts = await sync_to_async(Post.objects.select_related('author').order_by('-created_at').all)()
+    posts = Post.objects.select_related('author').order_by('-created_at').all()
     # converte o queryset para uma lista de dicionários
-    posts = await sync_to_async(list)(posts)
+    posts = list(posts)
+    
+    follow_data = get_follow_counts(request.user)
+    
     context = {
-        'posts': posts
+        'posts': posts,
+        'seguindo': follow_data['seguindo'],
+        'seguidores': follow_data['seguidores'],
     }
     
     return render(request, 'feed.html', context)
 
 #pagina dos posts do usuario, que contem os comentarios e o post
-@login_required
-async def post_detail(request, username, post_id):
+@login_required(login_url='login')
+def post_detail(request, username, post_id):
     # busca o post pelo id
-    post = await sync_to_async(Post.objects.select_related('author').get)(id=post_id)
+    post = Post.objects.select_related('author').get(id=post_id)
     
 
     if request.method == 'POST':
@@ -71,7 +77,7 @@ async def post_detail(request, username, post_id):
             return redirect('post_detail', username=username, post_id=post_id)
         
         # cria um novo comentario
-        await sync_to_async(criar_comentario)(
+        criar_comentario(
             post=post,
             author=request.user,
             content=content,
@@ -82,11 +88,11 @@ async def post_detail(request, username, post_id):
         
         # atualiza a contagem de comentarios do post
         post.comments_count += 1
-        await sync_to_async(post.save)()
+        post.save()
         return redirect('post_detail', username=username, post_id=post_id)
     
     # busca os comentarios do post e converte os comentarios para uma lista de dicionários
-    comments_list = await sync_to_async(list)(post.comments.select_related('author').order_by('-created_at'))
+    comments_list = list(post.comments.select_related('author').order_by('-created_at'))
     context = {
         'post': post,
         'comments': comments_list

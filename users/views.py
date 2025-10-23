@@ -3,12 +3,12 @@ from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.utils.html import strip_tags
-from .models import CustomUser, EmailVerificationToken, PasswordResetToken
+from .models import CustomUser, EmailVerificationToken, PasswordResetToken, Follow
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.db import IntegrityError
 from django.template.loader import render_to_string
 from django.contrib import messages
-from .services import RegisterUser
+from .services import RegisterUser, get_follow_counts
 from .forms import SolicitacaoRedefinicaoSenhaForm, RedefinicaoSenhaForm
 from django.utils import timezone
 from datetime import timedelta
@@ -32,6 +32,10 @@ def login(request):
         
     # Se o método for GET, renderiza a página de login
     return render(request, 'login.html')
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
 
 # --------------------------------------- PAGINA DE CADASTRO ---------------------------------------
 def cadastro(request):
@@ -63,8 +67,6 @@ def cadastro(request):
 
             # 2. Verifica se o email já existe
             if CustomUser.objects.filter(email=validador.email).exists():
-                # Não revela que o e-mail já existe. redireciona pra pagina login.
-                # Opcionalmente, você pode enviar um e-mail para o endereço existente aqui.
                 messages.success(request, 'Se uma conta com este e-mail existir, um link de verificação será enviado em breve.')
                 return redirect('login')
 
@@ -77,37 +79,79 @@ def cadastro(request):
         except IntegrityError:
             # Fallback para o caso de uma race condition (dois cadastros ao mesmo tempo)
             messages.error(request, 'Este nome de usuário ou e-mail já está em uso. Por favor, tente outro.')
-            return render(request, 'register.html', context)
+            return render(request, 'register.html')
         
     # Se o método for GET, renderiza a página de cadastro
     return render(request, 'register.html')
 
-# ------------------------------------------- FUNÇÃO DE LOGOUT ----------------------------------------
-@login_required
-def logout_view(request):
-    # se o usuário está autenticado deve sair da conta
-    logout(request)
-    return render(request, 'users/login.html')
+# ------------------------------------------- SISTEMA DE SEGUIDOR ----------------------------------------
+@login_required(login_url='login')
+def seguir_usuario(request, user_id):
+    usuario_para_seguir = get_object_or_404(CustomUser, id=user_id)
+    
+    usuario_logado = request.user
+    
+    if usuario_logado == usuario_para_seguir:
+        return redirect('perfil', username=usuario_para_seguir.username)
+    
+    rel, created = Follow.objects.get_or_create(
+        seguidor=usuario_logado,
+        seguindo=usuario_para_seguir
+    )
+    
+    return redirect('perfil', username=usuario_para_seguir.username)
 
+@login_required(login_url='login')
+def deixar_de_seguir(request, user_id):
+    usuario_para_deixar_de_seguir = get_object_or_404(CustomUser, id=user_id)
+    
+    usuario_logado = request.user
+    
+    if usuario_logado == usuario_para_deixar_de_seguir:
+        return redirect('perfil', username=usuario_para_deixar_de_seguir.username)
+    
+    relacionamento = Follow.objects.filter(
+        seguidor=usuario_logado,
+        seguindo=usuario_para_deixar_de_seguir
+    )
+    
+    if relacionamento.exists():
+        relacionamento.delete()
+    
+    return redirect('perfil', username=usuario_para_deixar_de_seguir.username)
 # --------------------------------------------- PAGINA DE PERFIL ----------------------------------------
 @login_required(login_url='login')
 def profile(request, username):
-    # Obtém o perfil do usuário pelo nome de usuário
-    # Se o usuário não for encontrado, retorna um erro 404
-    user = get_object_or_404(CustomUser, username=username)
+    profile_user = get_object_or_404(CustomUser, username=username)
+    user_logado = request.user
+
+    # Get counts for the profile user
+    profile_follow_data = get_follow_counts(profile_user)
+
+    # Get counts for the logged-in user (for the base template)
+    logged_in_user_follow_data = get_follow_counts(user_logado)
     
-    # verifica se o usuário autenticado é o mesmo do perfil
-    is_owner = request.user == user
+    is_following = False
+    if user_logado.is_authenticated:
+        is_following = Follow.objects.filter(seguidor=user_logado, seguindo=profile_user).exists()
+    
+    is_owner = user_logado == profile_user
     
     context = {
-        'perfil': user,
-        'user': user,
+        'user': profile_user,
         'is_owner': is_owner,
+        # Counts for the profile page (for profile_user)
+        'num_seguindo': profile_follow_data['seguindo'],
+        'num_seguidores': profile_follow_data['seguidores'],
+        # Counts for the base template (for logged_in_user)
+        'seguindo': logged_in_user_follow_data['seguindo'],
+        'seguidores': logged_in_user_follow_data['seguidores'],
+        'is_following': is_following,
     }
     return render(request, 'users/profile.html', context)
 
 # ----------------------------------------------- PAGINA DE EDITAR PERFIL ----------------------------------------
-@login_required
+@login_required(login_url='login')
 def edit_profile(request, id):
     user = request.user # Obtém o id do usuário autenticado
     
@@ -155,8 +199,8 @@ def verify_email(request, token):
         token_obj.save()  # Salva as alterações no token
 
         # Realiza o login do usuário automaticamente
-        auth_login(request, user)
-        return redirect('home')  # Redireciona para a página inicial ou outra página desejada
+        messages.success(request, 'Email verificado com sucesso!')
+        return redirect('login')  # Redireciona para a página inicial ou outra página desejada
     
 #-------------------------------------------- REDEFINIR SENHA ----------------------------------------
 # criar a pagina drecionamento para pagina que recebe o email
@@ -190,6 +234,8 @@ def password_reset(request):
                 return render(request, 'password_reset.html', {'success': True})
                 
             except CustomUser.DoesNotExist:
+                if settings.DEBUG:
+                    messages.error(request, f"O e-mail {email} não foi encontrado em nosso sistema.")
                 return render(request, 'password_reset.html', {'success': True})
         # If form is NOT valid, we fall through to the final render call
     else:
@@ -199,13 +245,12 @@ def password_reset(request):
     # This single return handles both GET requests and POST requests with invalid forms
     return render(request, 'password_reset.html', {'form': form})
 
-# criar pagina para colocar a senha nova
 def password_reset_confirm(request, token):
     try:
         token_obj = get_object_or_404(PasswordResetToken, token=token)
         user = token_obj.user
         
-        if token_obj.created_at < timezone.now() - timedelta(hours=1):
+        if token_obj.is_expired:
             messages.error(request, 'Token expirado. Por favor, solicite uma nova redefinição de senha.')
             token_obj.delete() # Remove o token expirado
             return redirect('password_reset')

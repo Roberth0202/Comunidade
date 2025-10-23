@@ -1,4 +1,4 @@
-from .models import CustomUser, EmailVerificationToken
+from .models import CustomUser, EmailVerificationToken, Follow
 from django.contrib import messages
 from django.conf import settings
 from django.core.mail import send_mail
@@ -169,3 +169,16 @@ def deleta_usuarios_nao_verificado():
     count = usuarios_nao_verificados.count() # conta quantos usuários serão deletados
     usuarios_nao_verificados.delete()
     return f'Deletados {count} usuários não verificados.'
+
+def get_follow_counts(user):
+    if not user.is_authenticated:
+        return {'seguindo': 0, 'seguidores': 0}
+
+    # 'seguindo' is the number of users `user` is following
+    seguindo = Follow.objects.filter(seguidor=user).count()
+    # 'seguidores' is the number of followers of `user`
+    seguidores = Follow.objects.filter(seguindo=user).count()
+    return {
+        'seguindo': seguindo,
+        'seguidores': seguidores
+    }

@@ -4,6 +4,8 @@ from . import views
 urlpatterns = [
     # tela de login
     path('login/', views.login, name='login'),
+    # tela de logout
+    path('logout/', views.logout_view, name='logout'),
     # tela de cadastro
     path('cadastro/', views.cadastro, name='register'),
     # verificação de email
@@ -12,6 +14,10 @@ urlpatterns = [
     path('perfil/<str:username>', views.profile, name='perfil'),
     # tela de editar perfil
     path('perfil/<int:id>/editar/', views.edit_profile, name='edit_profile'),
+    # seguir usuario
+    path('seguir_usuario/<int:user_id>/', views.seguir_usuario, name='seguir_usuario'),
+    # deixa de seguir
+    path('deixar_de_seguir_usuario/<int:user_id>/', views.deixar_de_seguir, name='deixar_de_seguir_usuario'),
     # recuperação de senha
     path('password-reset/', views.password_reset, name='password_reset'),
     # confirmação de recuperação de senha

@@ -13,7 +13,7 @@ class CustomUser(AbstractUser):
     data_criacao = models.DateTimeField(auto_now_add=True, verbose_name='Data de Criação')
     e_verificado = models.BooleanField(default=False, verbose_name='Email Verificado')
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = ['username', 'data_nascimento']
     # No AbstractUser ja tem o campo (username, email, password,first_name,
     # last_name, date_joined, is_active, is_staff, is_superuser, last_login)
     
@@ -49,11 +49,18 @@ class EmailVerificationToken(models.Model):
         ordering = ['-created_at']
         
 class Follow(models.Model):
-    follower = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='followers')
-    following = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='following')
+    seguidor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='seguidor')
+    seguindo = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='seguindo')
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
+        # Garante que um usuário não possa seguir o mesmo usuário mais de uma vez
+        constraints = [
+            models.UniqueConstraint(fields=['seguidor', 'seguindo'], name='unique_relacionamento')
+        ]
+        # Ordena por data de criação
+        ordering = ['-created_at']
+        
         verbose_name = 'Seguir'
         verbose_name_plural = 'Seguir'
 

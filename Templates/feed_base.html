@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/feed_base.css' %}">
+</head>
+
+<body>
+    <div class="container-menu">
+        <div class="shadow-card">
+            <div class="usuario">
+                {% if user.is_authenticated %}
+                    <div class="usuario-info">
+                        <div class="avatar">
+                            <img src="{% static 'img/login_icon.png' %}" alt="">
+                        </div>  
+                        <div class="username">
+                            <p>{{ user.username }}</p>
+                        </div>
+                    </div>
+                    <div class="info-follow">
+                        <span><strong style="color: #6613ff;">{{ seguindo }}</strong> Seguindo</span>
+                        <span><strong style="color: #6613ff;">{{ seguidores }}</strong> Seguidores</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <nav class="menu-principal">
+            <ul>
+                <li class="active">
+                    <a href="{% url 'home' %}">
+                        <i classclass="icon-home"></i> 
+                        <span>Início</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#"> <i class="icon-explorar"></i>
+                        <span>Explorar</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#"> <i class="icon-notificacoes"></i>
+                        <span>Notificações</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#"> <i class="icon-mensagens"></i>
+                        <span>Mensagens</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'perfil' user.username %}">
+                        <i class="icon-perfil"></i>
+                        <span>Perfil</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#"> <i class="icon-estatisticas"></i>
+                        <span>Estatísticas</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#"> <i class="icon-config"></i>
+                        <span>Configurações</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="menu-sair">
+            <a href="{% url 'logout' %}">
+                <i class="icon-sair"></i>
+                <span>Sair</span>
+            </a>
+        </div>
+    </div>
+
+    {% block content %}
+    {% endblock %}
+</body>
+</html>
