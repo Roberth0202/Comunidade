@@ -15,7 +15,7 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG")
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ['*', '.vercel.app']
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
@@ -62,7 +62,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'comuna.wsgi.application'
-
 
 #-------------------------------------------- Banco de dados ---------------------------------------
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
