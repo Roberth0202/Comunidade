@@ -117,7 +117,7 @@ body {
     margin-left: 13px;
 }
 
-.menu-principal ul li a:hover{
+.menu-principal ul li a.ativo{
     background: linear-gradient(50deg, rgba(138, 48, 255, 0.521), rgba(150, 70, 255, 1));
     box-shadow: 5px 5px 10px 0px rgba(150, 70, 255, 0.4);
     backdrop-filter: blur(5px);

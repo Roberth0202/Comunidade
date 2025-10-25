@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 {% load static %}
 <head>
     <meta charset="UTF-8">
@@ -30,40 +30,38 @@
 
         <nav class="menu-principal">
             <ul>
-                <li class="active">
-                    <a href="{% url 'home' %}">
-                        <i classclass="icon-home"></i> 
+                <li class="">
+                    <a class="{% if request.resolver_match.url_name == 'home' %}ativo{% endif %} " href="{% url 'home' %}"><i class="icon-home"></i> 
                         <span>Início</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#"> <i class="icon-explorar"></i>
+                    <a class="{% if request.resolver_match.url_name == 'explorar' %}ativo{% endif %} " href="#"> <i class="icon-explorar"></i>
                         <span>Explorar</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#"> <i class="icon-notificacoes"></i>
+                    <a class="{% if request.resolver_match.url_name == 'notificacoes' %}ativo{% endif %} " href="#"> <i class="icon-notificacoes"></i>
                         <span>Notificações</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#"> <i class="icon-mensagens"></i>
+                    <a class="{% if request.resolver_match.url_name == 'mensagens' %}ativo{% endif %} " href="#"> <i class="icon-mensagens"></i>
                         <span>Mensagens</span>
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'perfil' user.username %}">
-                        <i class="icon-perfil"></i>
+                    <a class="{% if request.resolver_match.url_name == 'perfil' %}ativo{% endif %} " href="{% url 'perfil' user.username %}"><i class="icon-perfil"></i>
                         <span>Perfil</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#"> <i class="icon-estatisticas"></i>
+                    <a class="{% if request.resolver_match.url_name == 'estatisticas' %}ativo{% endif %} " href="#"> <i class="icon-estatisticas"></i>
                         <span>Estatísticas</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#"> <i class="icon-config"></i>
+                    <a class="{% if request.resolver_match.url_name == 'config' %}ativo{% endif %} " href="#"> <i class="icon-config"></i>
                         <span>Configurações</span>
                     </a>
                 </li>
@@ -71,8 +69,7 @@
         </nav>
 
         <div class="menu-sair">
-            <a href="{% url 'logout' %}">
-                <i class="icon-sair"></i>
+            <a href="{% url 'logout' %}"><i class="icon-sair"></i>
                 <span>Sair</span>
             </a>
         </div>

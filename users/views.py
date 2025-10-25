@@ -148,7 +148,7 @@ def profile(request, username):
         'seguidores': logged_in_user_follow_data['seguidores'],
         'is_following': is_following,
     }
-    return render(request, 'users/profile.html', context)
+    return render(request, 'profile.html', context)
 
 # ----------------------------------------------- PAGINA DE EDITAR PERFIL ----------------------------------------
 @login_required(login_url='login')
