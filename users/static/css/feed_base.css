@@ -113,11 +113,21 @@ body {
     text-decoration-line: none;
 }
 
-.menu-principal ul li a span{
+.icon{
     margin-left: 13px;
 }
 
-.menu-principal ul li a.ativo{
+
+.menu-principal ul li a span{
+    margin-left: 5px;
+}
+
+.menu-link:hover{
+    background-color: rgb(138, 141, 146, 0.1);
+    color: white;
+}
+
+.menu-link.ativo{
     background: linear-gradient(50deg, rgba(138, 48, 255, 0.521), rgba(150, 70, 255, 1));
     box-shadow: 5px 5px 10px 0px rgba(150, 70, 255, 0.4);
     backdrop-filter: blur(5px);
@@ -149,10 +159,18 @@ body {
     backdrop-filter: blur(5px);
 }
 
+.icon-sair{
+    margin-left: 13px;
+}
+
+.icon-sair:hover{
+    color: rgb(233, 0, 0);
+}
+
 .menu-sair a span{
     margin-left: 13px;
 }
 
-.menu-sair a:hover span{
+.menu-sair a:hover{
     color: rgb(233, 0, 0);
 }
