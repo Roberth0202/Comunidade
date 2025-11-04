@@ -1,0 +1,80 @@
+.profile-user{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 52.4%;
+    margin-left: 350px;
+    box-sizing: border-box;
+}
+
+.profile-info{
+    display: flex;
+    margin-top: 20px;
+    border-radius: 20px;
+    align-self: center;
+    flex-direction: column;
+    border: 1px solid rgba(150, 70, 255, 0.2);
+    box-shadow: 0px 0px 30px 0px rgba(150, 70, 255, 0.2);
+    width: 89.3%;
+    height: 550px;
+    backdrop-filter: blur(100px);
+}
+
+.capa-perfil{
+    display: flex;
+    margin-top: 20px;
+}
+.foto-de-perfil{
+    display: flex;
+    margin-top: 129px;
+}
+.foto-de-perfil img{
+    display: flex;
+    margin-left: 5px;
+    width: 178px;
+    height: 178px;
+}
+.username-perfil{
+    display: flex;
+    margin-left: 27px;
+    font-size: 18px;
+}
+.username-perfil p{
+    color: #fff;
+    font-size: 28px;
+}
+
+.bio{
+    display: flex;
+    margin-left: 27px;
+    margin-top: 15px;
+    font-size: 20px ;
+}
+.bio p{
+    color: #fff;
+}
+
+.follows{
+    margin-left: 27px;
+    margin-top:117px;
+    font-size: 20px ;
+}
+.follows span{
+    font-weight: 600;
+    color: #888888;
+}
+
+.follows strong{
+    color: #fff;
+}
+
+.profile-posts{
+    display: flex;
+    flex-direction: column;
+    align-self: center;
+    margin-top: 20px;
+    border-radius: 20px;
+    width: 89.3%;
+    height: 400px;
+    background-color: aliceblue;
+}

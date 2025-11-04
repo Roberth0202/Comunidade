@@ -2,5 +2,75 @@
 {% load static %}
 
 {% block content %}
+<div class="profile-user">
+    <section class="profile-info" alt="Biografia do usuario">
+        {% if user.is_authenticated %}
+            {% if user == profile_user %}
+                <!-- Mostrar informações do perfil do usuário logado -->
+                <!--capa do perfil -->
 
+                <!-- Imagem de perfil -->
+                <div class="foto-de-perfil">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="Foto do perfil">
+                    {% else %}
+                        <img src="{% static 'img/default-avatar.svg' %}" alt="Foto do perfil">
+                    {% endif %}
+                </div>
+
+                <!--Nome do usario-->
+                <div class="username-perfil">
+                    <p>{{ user.username }}</p>
+                </div>
+
+                <!--Bio do usario-->
+                <div class="bio">
+                    <p>{{ user.bio }}</p>
+                </div>
+                
+                <!-- Contador de seguidores e seguindo -->
+                <div class="follows">
+                    <span><strong>{{ num_seguidores }}</strong> seguidores</span>
+                    <span><strong>{{ num_seguindo }}</strong> seguindo</span>
+                </div>
+                
+            {% elif profile_user %}
+                <!-- Mostrar informações do perfil do usuário logado -->
+                <!--capa do perfil -->
+                <div class="capa-perfil">
+                    <img src="" alt="">
+                </div>
+                <!-- Imagem de perfil -->
+                <div class="foto-de-perfil">
+                    {% if profile_user.avatar %}
+                        <img src="{{ profile_user.avatar.url }}" alt="Foto do perfil">
+                    {% else %}
+                        <img src="{% static 'img/default-avatar.svg' %}" alt="Foto do perfil">
+                    {% endif %}
+                </div>
+
+                <!--Nome do usario-->
+                <div class="username-perfil">
+                    <p>{{ profile_user.username }}</p>
+                </div>
+
+                <!--Bio do usario-->
+                <div class="bio">
+                    <p>{{ profile_user.bio }}</p>
+                </div>
+                
+                <!-- Contador de seguidores e seguindo -->
+                <div class="follows">
+                    <span><strong>{{ num_seguidores }}</strong> seguidores</span>
+                    <span><strong>{{ num_seguindo }}</strong> seguindo</span>
+                </div>
+            {% endif %}
+        {% endif %}
+    </section>
+
+    <section class="profile-posts" alt="Postagens do usuario">
+
+
+    </section>
+</div>
 {% endblock %}

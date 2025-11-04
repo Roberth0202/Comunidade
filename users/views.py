@@ -44,7 +44,7 @@ def cadastro(request):
         validador = RegisterUser(
             request,
             username = request.POST.get('username', '').strip(),
-            email = request.POST.get('email', '').strip(),
+            email = request.POST.get('email', '').strip().lower(),
             password1 = request.POST.get('password1', '').strip(),
             password2 = request.POST.get('password2', '').strip(), 
             data_nascimento = request.POST.get('data_nascimento')
@@ -124,26 +124,28 @@ def deixar_de_seguir(request, user_id):
 def profile(request, username):
     profile_user = get_object_or_404(CustomUser, username=username)
     user_logado = request.user
+    is_owner = user_logado == profile_user
 
     # Get counts for the profile user
     profile_follow_data = get_follow_counts(profile_user)
 
     # Get counts for the logged-in user (for the base template)
-    logged_in_user_follow_data = get_follow_counts(user_logado)
-    
+    if is_owner:
+        logged_in_user_follow_data = profile_follow_data
+    else:
+        logged_in_user_follow_data = get_follow_counts(user_logado)
+
     is_following = False
-    if user_logado.is_authenticated:
+    if not is_owner:
         is_following = Follow.objects.filter(seguidor=user_logado, seguindo=profile_user).exists()
-    
-    is_owner = user_logado == profile_user
-    
+
     context = {
-        'user': profile_user,
+        'profile_user': profile_user,
         'is_owner': is_owner,
-        # Counts for the profile page (for profile_user)
+        # Contadores para a página de perfil (do profile_user)
         'num_seguindo': profile_follow_data['seguindo'],
         'num_seguidores': profile_follow_data['seguidores'],
-        # Counts for the base template (for logged_in_user)
+        # Contadores para o template base (do usuário logado)
         'seguindo': logged_in_user_follow_data['seguindo'],
         'seguidores': logged_in_user_follow_data['seguidores'],
         'is_following': is_following,

@@ -5,11 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'css/feed_base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/perfil.css' %}">
 </head>
 
 <body>
+    <div class="luz-fundo"></div>
     <div class="container-menu">
-        <div class="shadow-card">
+        <div class="shadow-card" stye>
             <div class="usuario">
                 {% if user.is_authenticated %}
                     <div class="usuario-info">
