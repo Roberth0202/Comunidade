@@ -8,6 +8,7 @@
 }
 
 .profile-info{
+    position: relative;
     display: flex;
     margin-top: 20px;
     border-radius: 20px;
@@ -21,19 +22,133 @@
 }
 
 .capa-perfil{
+    position: absolute;
     display: flex;
-    margin-top: 20px;
+    border-radius: 20px 20px 0px 0px;
+    width: 100%;
+    height: 220px;
+    z-index: -1;
+}
+
+.default-capa{
+    background-color: #888888;
+    border-radius: 20px 20px 0px 0px;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.capa-perfil img{
+    width: 100%;
+    height: 100%;
+    border-radius: 20px 20px 0px 0px;
+    object-fit: cover;
 }
 .foto-de-perfil{
     display: flex;
-    margin-top: 129px;
+    margin-top: 149px;
+    margin-left: 27px;
+    width: 140px;
+    height: 140px;
 }
-.foto-de-perfil img{
+.foto{
     display: flex;
-    margin-left: 5px;
-    width: 178px;
-    height: 178px;
+    border-radius: 50%;
+    width: 100%; 
+    height: 100%;
 }
+
+.foto-de-perfil img{
+    border-radius: 50%;
+    width: 100%; 
+    height: 100%;
+}
+
+.edit-perfil{
+    display: flex;
+    position: absolute;
+    margin-left: 35.3rem;
+    margin-top: 14rem;
+    background: linear-gradient(50deg, rgba(138, 48, 255, 0.521), rgba(150, 70, 255, 1));
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    width: 7rem;
+    height: 3rem;
+}
+.edit-perfil a{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 600;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    text-decoration: none;
+}
+
+.seguir-usuario{
+    display: flex;
+    position: absolute;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    margin-top: 14rem;
+    margin-left: 35.3rem;
+    width: 7rem;
+    height: 3rem;
+}
+
+.btn-seguir{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(50deg, rgba(138, 48, 255, 0.521), rgba(150, 70, 255, 1));
+    color: #fff;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    width: 7rem;
+    height: 3rem;
+    border-radius: 10px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn-seguindo{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: linear-gradient(50deg, rgba(138, 48, 255, 0.521), rgba(150, 70, 255, 1));
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    width: 7rem;
+    height: 3rem;
+    border-radius: 10px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+
+
+.btn-seguindo::before{
+    content: attr(data-text);
+}
+
+.btn-seguindo:hover{
+    background: rgb(233, 0, 0, 0.4);
+    color: rgb(224, 0, 0);
+    width: 9rem;
+}
+
+.btn-seguindo:hover::before{
+    content: attr(data-text-hover);
+}
+
 .username-perfil{
     display: flex;
     margin-left: 27px;
@@ -45,19 +160,24 @@
 }
 
 .bio{
-    display: flex;
     margin-left: 27px;
-    margin-top: 15px;
+    margin-top: 5px;
     font-size: 20px ;
+    width: 92.5%;
+    height: 7.6rem;
 }
+
 .bio p{
     color: #fff;
+    overflow-wrap: break-word;
 }
 
 .follows{
+    display: flex;
     margin-left: 27px;
-    margin-top:117px;
+    margin-top: 20px;
     font-size: 20px ;
+    gap:25px;
 }
 .follows span{
     font-weight: 600;

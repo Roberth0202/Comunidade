@@ -8,10 +8,10 @@ from django.contrib.auth import authenticate, login as auth_login, logout
 from django.db import IntegrityError
 from django.template.loader import render_to_string
 from django.contrib import messages
-from .services import RegisterUser, get_follow_counts
-from .forms import SolicitacaoRedefinicaoSenhaForm, RedefinicaoSenhaForm
-from django.utils import timezone
-from datetime import timedelta
+from .services import RegisterUser
+from .forms import EditUserForm, SolicitacaoRedefinicaoSenhaForm, RedefinicaoSenhaForm
+from django.views.decorators.http import require_POST
+from django.db.models import Count, Exists, OuterRef
 
 # ------------------------------------------- PAGINA DE LOGIN ----------------------------------------
 def login(request):
@@ -86,97 +86,108 @@ def cadastro(request):
 
 # ------------------------------------------- SISTEMA DE SEGUIDOR ----------------------------------------
 @login_required(login_url='login')
+@require_POST
 def seguir_usuario(request, user_id):
-    usuario_para_seguir = get_object_or_404(CustomUser, id=user_id)
+    user_to_follow = get_object_or_404(CustomUser, pk=user_id)
     
     usuario_logado = request.user
     
-    if usuario_logado == usuario_para_seguir:
-        return redirect('perfil', username=usuario_para_seguir.username)
+    if usuario_logado == user_to_follow:
+        return redirect('perfil', user_id=user_to_follow.pk)
     
-    rel, created = Follow.objects.get_or_create(
+    Follow.objects.get_or_create(
         seguidor=usuario_logado,
-        seguindo=usuario_para_seguir
+        seguindo=user_to_follow
     )
     
-    return redirect('perfil', username=usuario_para_seguir.username)
+    return redirect('perfil', username=user_to_follow.username)
 
 @login_required(login_url='login')
+@require_POST
 def deixar_de_seguir(request, user_id):
-    usuario_para_deixar_de_seguir = get_object_or_404(CustomUser, id=user_id)
+    user_to_unfollow = get_object_or_404(CustomUser, pk=user_id)
     
     usuario_logado = request.user
     
-    if usuario_logado == usuario_para_deixar_de_seguir:
-        return redirect('perfil', username=usuario_para_deixar_de_seguir.username)
+    if usuario_logado == user_to_unfollow:
+        return redirect('perfil', user_id=user_to_unfollow.pk)
     
     relacionamento = Follow.objects.filter(
         seguidor=usuario_logado,
-        seguindo=usuario_para_deixar_de_seguir
+        seguindo=user_to_unfollow
     )
     
     if relacionamento.exists():
         relacionamento.delete()
     
-    return redirect('perfil', username=usuario_para_deixar_de_seguir.username)
+    return redirect('perfil', username=user_to_unfollow.username)
+
 # --------------------------------------------- PAGINA DE PERFIL ----------------------------------------
 @login_required(login_url='login')
 def profile(request, username):
-    profile_user = get_object_or_404(CustomUser, username=username)
     user_logado = request.user
-    is_owner = user_logado == profile_user
 
-    # Get counts for the profile user
-    profile_follow_data = get_follow_counts(profile_user)
+    # --- Otimização 1: Subquery com Exists ---
+    # Preparamos uma subquery para checar se o user_logado
+    # segue o usuário do perfil (OuterRef se refere à query principal)
+    is_following_subquery = Follow.objects.filter(
+        seguidor = user_logado,
+        seguindo = OuterRef('pk') # 'pk/primery key' é do CustomUser da query principal
+    )  # retorna True se o user_logado segue o usuário do perfil, False caso contrário
+    
+    # --- A GRANDE QUERY OTIMIZADA ---
+    # Buscamos o usuário pelo username, ao mesmo tempo, anotamos (adicionamos) 
+    # as contagens e o status de "seguir" nele.
+    perfil_user = get_object_or_404(
+        CustomUser.objects.annotate(
+            # Contagem de quantos ELES seguem
+            following_count = Count('seguidor', distinct=True),
+            # Contagem de quantos OS seguem
+            follows_count = Count('seguindo', distinct=True),
+            # Booleano: o user_logado segue este perfil?
+            is_following = Exists(is_following_subquery)
+        ),
+        username=username
+    )
+    
+    is_owner = user_logado == perfil_user
+    
+    # As contagens já vieram na query (não precisamos de get_follow_counts)
+    profile_follow_data = {
+        'seguindo': perfil_user.following_count,
+        'seguidores': perfil_user.follows_count,
+    }
 
-    # Get counts for the logged-in user (for the base template)
-    if is_owner:
-        logged_in_user_follow_data = profile_follow_data
-    else:
-        logged_in_user_follow_data = get_follow_counts(user_logado)
-
-    is_following = False
-    if not is_owner:
-        is_following = Follow.objects.filter(seguidor=user_logado, seguindo=profile_user).exists()
+    is_following = perfil_user.is_following
 
     context = {
-        'profile_user': profile_user,
+        'perfil_user': perfil_user,
         'is_owner': is_owner,
-        # Contadores para a página de perfil (do profile_user)
+        # Contadores para a página de perfil (do perfil_user)
         'num_seguindo': profile_follow_data['seguindo'],
         'num_seguidores': profile_follow_data['seguidores'],
-        # Contadores para o template base (do usuário logado)
-        'seguindo': logged_in_user_follow_data['seguindo'],
-        'seguidores': logged_in_user_follow_data['seguidores'],
         'is_following': is_following,
     }
     return render(request, 'profile.html', context)
 
 # ----------------------------------------------- PAGINA DE EDITAR PERFIL ----------------------------------------
 @login_required(login_url='login')
-def edit_profile(request, id):
-    user = request.user # Obtém o id do usuário autenticado
+def edit_profile(request):
+    user = request.user
     
-    # Verifica se o usuário tem permissão para editar o perfil
-    if user.id == id:
-        if request.method == 'POST':
-            user.username = request.POST.get('username', user.username)
-            user.email = request.POST.get('email', user.email)
-            user.avatar = request.FILES.get('avatar', user.avatar)
-            user.first_name = request.POST.get('first_name', user.first_name)
-            user.last_name = request.POST.get('last_name', user.last_name)
-            user.data_nascimento = request.POST.get('data_nascimento', user.data_nascimento)
-            user.save()
+    if request.method == 'POST':
+        form = EditUserForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
             messages.success(request, 'Perfil atualizado com sucesso!')
             return redirect('perfil', username=user.username)
-        
-        # Se for GET, renderiza o formulário de edição
-        return render(request, 'users/edit_profile.html', {'user': user})
-    
     else:
-        # Se o usuário não tiver permissão, redireciona para a página de perfil
-        messages.error(request, 'Você não tem permissão para editar este perfil.')
-        return redirect('perfil', username=user.username)
+        form = EditUserForm(instance=user)
+    
+    context = {
+        'form': form,
+    }
+    return render(request, 'edit_user.html', context)
 
 # ----------------------------------------------- verificaçao de email  ----------------------------------------
 def verify_email(request, token):

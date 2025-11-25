@@ -7,8 +7,9 @@ from django.db import models
 # Usuario personalizado para a rede social
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True, verbose_name='Email')
-    bio = models.TextField(max_length=280, blank=True)
+    bio = models.TextField(max_length=160, blank=True)
     avatar = models.ImageField(upload_to='avatars/', default=None, blank=True, verbose_name='Avatar')
+    capa = models.ImageField(upload_to='capas/', default=None, blank=True, null=True, verbose_name='Capa')
     data_nascimento = models.DateField(null=False, blank=False, verbose_name='Data de Nascimento')
     data_criacao = models.DateTimeField(auto_now_add=True, verbose_name='Data de Criação')
     e_verificado = models.BooleanField(default=False, verbose_name='Email Verificado')

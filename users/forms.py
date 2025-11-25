@@ -1,6 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from .services import validate_password_strength as validate_password
+from .models import CustomUser
 
 class SolicitacaoRedefinicaoSenhaForm(forms.Form):
     email = forms.EmailField(
@@ -38,3 +39,23 @@ class RedefinicaoSenhaForm(forms.Form):
                     self.add_error('nova_senha', e)
         
         return cleaned_data
+
+class EditUserForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['capa', 'avatar', 'username', 'bio']
+        widgets = {
+            'capa': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
+            'avatar': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
+            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome de usuário', 'maxlength': 20}),
+            'bio': forms.Textarea( attrs={'class': 'form-control', 'maxlength': 160,'placeholder': 'Bio', }),
+        }
+        help_texts = {
+            'username': '',
+        }
+        error_messages = {
+            'username': {
+                'invalid': 'Nome de usuário inválido. Use apenas letras, números e @/./+/-/_',
+                'unique': 'Um usuário com este nome já existe.',
+            },
+        }

@@ -8,6 +8,7 @@ from django.contrib.auth.password_validation import validate_password, get_passw
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from datetime import timedelta
+from django.db.models import Count
 import re
 
 
@@ -182,3 +183,27 @@ def get_follow_counts(user):
         'seguindo': seguindo,
         'seguidores': seguidores
     }
+    
+def user_stats_processor(request):
+    if not request.user.is_authenticated:
+        return {'logged_in_user_stats': None}
+    
+    try:
+        # Buscamos o usuário logado UMA VEZ com suas contagens anotadas
+        # Usamos nomes longos e únicos para NUNCA colidir com as views
+        user_with_stats = CustomUser.objects.annotate(
+            processor_following_count = Count('seguidor', distinct=True),
+            processor_followers_count = Count('seguindo', distinct=True),
+        ).get(pk=request.user.pk)
+        
+        # Criamos um dicionário limpo para o template
+        status_data = {
+            'following_count': user_with_stats.processor_following_count,
+            'followers_count': user_with_stats.processor_followers_count,
+            'username': user_with_stats.username,
+        }
+        
+        return {'logged_in_user_stats': status_data}
+        
+    except CustomUser.DoesNotExist:
+        return {'logged_in_user_stats': None}
