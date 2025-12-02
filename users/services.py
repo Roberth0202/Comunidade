@@ -9,6 +9,10 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Count
+from django.db.models.signals import pre_save, post_delete
+from django.dispatch import receiver
+import cloudinary.uploader
+
 import re
 
 
@@ -207,3 +211,16 @@ def user_stats_processor(request):
         
     except CustomUser.DoesNotExist:
         return {'logged_in_user_stats': None}
+
+
+    
+@receiver(post_delete, sender=CustomUser)
+def deleta_imagem_ao_deletar_usuario(sender, instance, **kwargs):
+    """
+    Se o usuário for deletado do banco, deleta a foto dele do Cloudinary também.
+    """
+    if instance.avatar and hasattr(instance.avatar, 'public_id'):
+        cloudinary.uploader.destroy(instance.avatar.public_id)
+
+    if instance.capa and hasattr(instance.capa, 'public_id'):
+        cloudinary.uploader.destroy(instance.capa.public_id)

@@ -3,13 +3,27 @@ import uuid
 from datetime import timedelta
 from django.utils import timezone
 from django.db import models
+from django.core.validators import RegexValidator
+from cloudinary.models import CloudinaryField
 
 # Usuario personalizado para a rede social
 class CustomUser(AbstractUser):
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        validators=[RegexValidator(
+            regex=r'^[\w.@+\- ]+$',
+            message='O nome de usuário pode conter letras, números, espaços e os caracteres @/./+/-/_',
+            code='invalid'
+        )],
+        error_messages={
+            'unique': "Um usuário com este nome já existe.",
+        }
+    )
     email = models.EmailField(unique=True, verbose_name='Email')
     bio = models.TextField(max_length=160, blank=True)
-    avatar = models.ImageField(upload_to='avatars/', default=None, blank=True, verbose_name='Avatar')
-    capa = models.ImageField(upload_to='capas/', default=None, blank=True, null=True, verbose_name='Capa')
+    avatar = CloudinaryField('avatar', folder='avatars', blank=True)
+    capa = CloudinaryField('capa', folder='capas', blank=True, null=True)
     data_nascimento = models.DateField(null=False, blank=False, verbose_name='Data de Nascimento')
     data_criacao = models.DateTimeField(auto_now_add=True, verbose_name='Data de Criação')
     e_verificado = models.BooleanField(default=False, verbose_name='Email Verificado')

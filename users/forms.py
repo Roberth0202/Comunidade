@@ -2,6 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from .services import validate_password_strength as validate_password
 from .models import CustomUser
+import cloudinary
 
 class SolicitacaoRedefinicaoSenhaForm(forms.Form):
     email = forms.EmailField(
@@ -45,7 +46,7 @@ class EditUserForm(forms.ModelForm):
         model = CustomUser
         fields = ['capa', 'avatar', 'username', 'bio']
         widgets = {
-            'capa': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
+            'capa': forms.ClearableFileInput(attrs={'class': ' form-control-file'}),
             'avatar': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
             'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome de usuário', 'maxlength': 20}),
             'bio': forms.Textarea( attrs={'class': 'form-control', 'maxlength': 160,'placeholder': 'Bio', }),
@@ -55,7 +56,32 @@ class EditUserForm(forms.ModelForm):
         }
         error_messages = {
             'username': {
-                'invalid': 'Nome de usuário inválido. Use apenas letras, números e @/./+/-/_',
+                'invalid': 'Nome de usuário inválido. Use apenas letras, números, espaços e @/./+/-/_',
                 'unique': 'Um usuário com este nome já existe.',
             },
         }
+
+    def save(self, commit=True):
+        # Primeiro, obtemos o estado antigo do usuário do banco de dados
+        old_user = CustomUser.objects.get(pk=self.instance.pk)
+
+        # Em seguida, chamamos o método save do pai com commit=False para que o upload seja feito,
+        # mas o objeto não seja salvo no banco de dados ainda.
+        user = super().save(commit=False)
+
+        # Agora, verificamos se o campo 'avatar' foi alterado.
+        if 'avatar' in self.changed_data:
+            # Se havia um avatar antigo, nós o deletamos.
+            if old_user.avatar and hasattr(old_user.avatar, 'public_id'):
+                cloudinary.uploader.destroy(old_user.avatar.public_id)
+
+        # Fazemos o mesmo para o campo 'capa'.
+        if 'capa' in self.changed_data:
+            # Se havia uma capa antiga, nós a deletamos.
+            if old_user.capa and hasattr(old_user.capa, 'public_id'):
+                cloudinary.uploader.destroy(old_user.capa.public_id)
+
+        if commit:
+            user.save()
+
+        return user

@@ -48,7 +48,6 @@
     display: flex;
     margin-top: 149px;
     margin-left: 27px;
-    border-radius: 50%;
     width: 140px;
     height: 140px;
 }
@@ -63,7 +62,7 @@
 .edit-perfil{
     display: flex;
     position: absolute;
-    margin-left: 35.3rem;
+    margin-left: 31.3rem;
     margin-top: 14rem;
     background: linear-gradient(50deg, rgba(138, 48, 255, 0.521), rgba(150, 70, 255, 1));
     align-items: center;

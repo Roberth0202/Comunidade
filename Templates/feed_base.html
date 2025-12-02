@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 {% load static %}
+{% load cloudinary %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,7 +18,11 @@
                 {% if user.is_authenticated %}
                     <div class="usuario-info">
                         <div class="avatar">
-                            <img src="{% static 'img/login_icon.png' %}" alt="">
+                            {% if user.avatar %}
+                                {% cloudinary user.avatar crop='thumb' gravity='face' radius='max' quality='auto' fetch_format='auto' %}
+                            {% else %}
+                                <img src="{% static 'img/login_icon.png' %}" alt="">
+                            {% endif %}
                         </div>  
                         <div class="username">
                             <p>{{ user.username }}</p>

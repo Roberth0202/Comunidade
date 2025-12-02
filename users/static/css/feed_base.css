@@ -48,8 +48,8 @@ body {
 .usuario-info{
     display: flex;
     align-items: center;
-    margin-right: 43%;
     gap: 10px;
+    width: 100%;
 }
 
 .avatar{
@@ -58,12 +58,14 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 100%;
+    border-radius: 50%;
+    margin-left: 25px;
 }
 .avatar img{
-    width: 65px;
-    height: 65px;
-    display: flex;
+    border-radius: 50%;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 .username{
     color: #fff;

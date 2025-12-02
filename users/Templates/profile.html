@@ -1,5 +1,6 @@
 {% extends 'feed_base.html' %}
 {% load static %}
+{% load cloudinary %}
 
 {% block content %}
 <div class="profile-user">
@@ -8,19 +9,19 @@
         {% if user == perfil_user %}
         <!--capa do perfil -->
         <div class="capa-perfil">
-            {% if perfil_user.capa %}
-            <img src="{{ perfil_user.capa.url }}" alt="capa de perfil do usuario">
+            {% if user.capa %}
+                {% cloudinary user.capa crop='thumb' quality='auto' fetch_format='auto' %}
             {% else %}
-            <div class="default-capa"></div>
+                <div class="default-capa"></div>
             {% endif %}
         </div>
 
         <!-- Imagem de perfil -->
         <div class="foto-de-perfil">
             {% if user.avatar %}
-            <img src="{{ user.avatar.url }}" alt="Foto do perfil">
+                {% cloudinary user.avatar crop="thumb" gravity="face" radius="max" quality='auto' fetch_format='auto' %}
             {% else %}
-            <img src="{% static 'img/default-avatar.svg' %}" alt="Foto do perfil">
+                <img src="{% static 'img/default-avatar.svg' %}" alt="Foto do perfil">
             {% endif %}
         </div>
 
@@ -51,7 +52,7 @@
         <!--capa do perfil -->
         <div class="capa-perfil">
             {% if perfil_user.capa %}
-                <img src="{{ perfil_user.capa.url }}" alt="capa de perfil do usuario">
+                {% cloudinary perfil_user.capa crop='thumb' quality='auto' fetch_format='auto' %}
             {% else %}
                 <div class="default-capa"></div>
             {% endif %}
@@ -60,7 +61,7 @@
         <!-- Imagem de perfil -->
         <div class="foto-de-perfil">
             {% if perfil_user.avatar %}
-                <img class="foto" src="{{ perfil_user.avatar.url }}" alt="Foto do perfil">
+                {% cloudinary perfil_user.avatar crop="thumb" gravity="face" radius="max" quality='auto' fetch_format='auto'%}
             {% else %}
                 <img class="foto" src="{% static 'img/default-avatar.svg' %}" alt="Foto do perfil">
             {% endif %}
